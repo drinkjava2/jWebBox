@@ -9,9 +9,11 @@ Key features about JWebBox2.0.0:
 6)JWebBox2.0.0 is based on JWebBox1.x.1 but made lots improvements, old version JWebBox1.x.x is not recommended to use in projects.  
 
 How to use it:
-You can throw the jwebbox2.war file into webapps folder, start your Tomcat or JBoss to see the demo, source code is included in jwebbox2.war, this file can also be imported into Eclipse as a project.
-  
+Copy Box.java into your web project src folder.
 
+Demo file:
+There is a demo file "jwebbox2.war" can found on jwebbox project site, unzip or throw it into Tomcat/JBoss webapp folder to see how it works.
+  
 Typically a project using JWebBox2.0, need prepare below files:
 
 1.JSP page and JSP Template files, for example:
