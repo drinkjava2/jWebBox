@@ -1,19 +1,17 @@
-﻿JWebBox is a small layout tool used in java server pages(JSP) projects, playing the same role like Tiles and SiteMesh, but it's pure Object-Oriented designed, no XML files, no Tags, it's simple(only 1 java class) and easy to use, it can be used to build whole web site or only some page components. JWebBox is open source software follows BSD-3 license.  
+JWebBox2.0.0 is a small layout tool used in java server pages(JSP) projects, playing the same role like Tiles and SiteMesh, but it's pure Object-Oriented designed, no XML files, no Tags, it's simple(only 1 java class) and easy to use, it can be used to build whole web site or only some page components. JWebBox2.0.0 is an open source software follows BSD license.  
 
-Key features about JWebBox2.0:
+Key features about JWebBox2.0.0:
 1)Use Java class, not XML file to present JSP layouts, the Java class be called "Box".  
 2)No conflict with other framework tools like Tiles/Struts/Spring MVC..., it can be used to build whole web site or only for few page components.
 3)No XML files, no Tags, no 3rd party jar library needed.
 4)All layout are created dynamically, it's easy to modify or create layouts at run-time.
 5)Only 1 file "Box.java" is necessary, no .jar file can be found in this project because I recommend you can copy "Box.java" into your source code folder, so you can read and modify source code easily, in fact it's a small file only ~300 lines.
-6)JWebBox2.0 is based on JWebBox1.x.1 but made lots improvements, old version JWebBox1.x.x is not recommended to use in projects.  
+6)JWebBox2.0.0 is based on JWebBox1.x.1 but made lots improvements, old version JWebBox1.x.x is not recommended to use in projects.  
 
 How to use it:
-Copy Box.java into your web project src folder.
-
-Demo file:
-There is a demo file "jwebbox2.war" can found on jwebbox project site, unzip or throw it into Tomcat/JBoss webapp folder to see how it works.
+You can throw the jwebbox2.war file into webapps folder, start your Tomcat or JBoss to see the demo, source code is included in jwebbox2.war, this file can also be imported into Eclipse as a project.
   
+
 Typically a project using JWebBox2.0, need prepare below files:
 
 1.JSP page and JSP Template files, for example:
@@ -93,6 +91,5 @@ index.jsp：
 
 
 
-Yong Zhu
-Yong9981@gmail.com
+Yong Z.
 2016-02-06
