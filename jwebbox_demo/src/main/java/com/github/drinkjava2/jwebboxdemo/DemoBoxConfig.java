@@ -10,6 +10,17 @@ import com.github.drinkjava2.jwebbox.WebBox;
 
 @SuppressWarnings("all")
 public class DemoBoxConfig {
+	// Demo1 - HomePage
+	public static class DemoHomePage extends WebBox {
+		{
+			this.setPage("/WEB-INF/pages/homepage.jsp"); 
+			this.setAttribute("menu",
+					new WebBox("/WEB-INF/pages/menu.jsp").setAttribute("msg", "Demo1 - A basic layout"));
+			this.setAttribute("body", new LeftRightLayout());
+			this.setAttribute("footer",  new WebBox( "/WEB-INF/pages/footer.jsp"));
+		}
+	}
+	
 	// Left right layout
 	public static class LeftRightLayout extends WebBox {
 		{
@@ -19,26 +30,7 @@ public class DemoBoxConfig {
 			boxlist.add(new WebBox().setPage("/WEB-INF/pages/page2.jsp"));
 			this.setAttribute("boxlist", boxlist);
 		}
-	}
-
-	// Top down layout
-	public static class TopDownLayout extends LeftRightLayout {
-		{
-			this.setPage("/WEB-INF/pages/top_down.jsp");
-		}
-	}
-
-	// Demo1 - HomePage
-	public static class DemoHomePage extends WebBox {
-		{
-			this.setPage("/WEB-INF/pages/homepage.jsp");
-			this.setAttribute("header", "/WEB-INF/pages/header.jsp");
-			this.setAttribute("menu",
-					new WebBox().setPage("/WEB-INF/pages/menu.jsp").setAttribute("msg", "Demo1 - A basic layout"));
-			this.setAttribute("body", new LeftRightLayout());
-			this.setAttribute("footer", "/WEB-INF/pages/footer.jsp");
-		}
-	}
+	}  
 
 	// Demo2 - Change body layout
 	public static class DemoTopDown extends DemoHomePage {
@@ -48,12 +40,19 @@ public class DemoBoxConfig {
 		}
 	}
 
+	// Top down layout
+	public static class TopDownLayout extends LeftRightLayout {
+		{
+			this.setPage("/WEB-INF/pages/top_down.jsp");
+		}
+	}
+	
 	// Demo3 - Prepare methods
 	public static class DemoPrepareData extends DemoHomePage {
 		{
 			setPrepareStaticMethod(DemoBoxConfig.class.getName() + ".changeMenu");
 			setAttribute("body", new WebBox().setText("<div style=\"width:900px\"> This is body </div>")
-					.setPrepareBean(new Printer()));
+					.setPrepareURL("/WEB-INF/pages/prepare.jsp").setPrepareBean(new Printer()));
 			setAttribute("footer", new WebBox("/WEB-INF/pages/footer.jsp").setPrepareBean(new Printer())
 					.setPrepareBeanMethod("print"));
 		}
@@ -70,6 +69,7 @@ public class DemoBoxConfig {
 
 		public void print(PageContext pageContext, WebBox callerBox) throws IOException {
 			pageContext.getOut().write("This is printed by Printer's print method <br/>");
+			pageContext.getOut().write((String) pageContext.getRequest().getAttribute("urlPrepare"));
 		}
 	}
 

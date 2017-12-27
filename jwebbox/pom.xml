@@ -2,12 +2,12 @@
  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
  <modelVersion>4.0.0</modelVersion>
  <groupId>com.github.drinkjava2</groupId>
- <artifactId>jwebboxdemo</artifactId>
+ <artifactId>jwebbox</artifactId>
  <packaging>war</packaging>
- <version>0.0.1-SNAPSHOT</version>
+ <version>2.1</version>
  
- <name>jwebboxdemo</name>
- <description>jwebboxdemo demo project of jWebBox</description> 
+ <name>jWebBox</name>
+ <description>jWebBox is a JSP layout tool</description> 
    
  <licenses>
    <license>
@@ -40,37 +40,25 @@
         <version.source-plugin>2.4</version.source-plugin>
         <version.javadoc-plugin>2.10.3</version.javadoc-plugin>
         <version.gpg-plugin>1.6</version.gpg-plugin>
- </properties> 
- 
- 
+ </properties>  
 
  <dependencies> 
  
-    <!-- Servlet API and JSTL are for compile only -->
-	<dependency>
-		<groupId>javax.servlet</groupId>
-		<artifactId>servlet-api</artifactId>
-		<version>2.5</version>
-		<scope>provided</scope>
-	</dependency>
-	<dependency>
-		<groupId>javax.servlet.jsp</groupId>
-		<artifactId>jsp-api</artifactId>
-		<version>2.1</version>
-		<scope>provided</scope>
-	</dependency> 
-            
-    <!-- Test -->
+    <!-- For compile only -->
     <dependency>
-     <groupId>junit</groupId>
-     <artifactId>junit</artifactId>
-     <version>4.11</version>
-     <scope>test</scope>
+       <groupId>javax.servlet</groupId>
+       <artifactId>servlet-api</artifactId>
+       <version>2.5</version>
+       <scope>provided</scope>
     </dependency>
-  
- </dependencies>
- 
- 
+    <dependency>
+       <groupId>javax.servlet.jsp</groupId>
+       <artifactId>jsp-api</artifactId>
+       <version>2.1</version>
+       <scope>provided</scope>
+    </dependency>  
+   
+ </dependencies> 
 
     <build>
         <plugins>
@@ -159,7 +147,7 @@
                             <properties>
                               <javadoc.opts>-Xdoclint:none</javadoc.opts>
                             </properties>
-              <!-- close doc lint check for JAVA8 is additionalparam>-Xdoclint:none</additionalparam-->
+                            <!-- close doc lint check for JAVA8 is additionalparam>-Xdoclint:none</additionalparam-->
                         </configuration>
                     </plugin>
                     <plugin>

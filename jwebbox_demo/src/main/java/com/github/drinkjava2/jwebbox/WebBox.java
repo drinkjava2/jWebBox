@@ -39,7 +39,7 @@ public class WebBox {
 	// If prepareBeanMethod is set, use it instead of use bean's "prepare" method
 	private String prepareBeanMethod;
 
-	private String prepareURL;// A URL, 2rd called, if have
+	private String prepareURL;// A URL, 3rd called, if have
 
 	private String text; // A text , 3rd output, if not empty
 
@@ -135,6 +135,7 @@ public class WebBox {
 		try {
 			pageContext.getRequest()
 					.getRequestDispatcher(
+							//pageContext.getServletContext().getContextPath()+
 							pageOrUrl + ((pageOrUrl).indexOf("?") >= 0 ? "&" : "?") + "boxCallerID=" + boxCallerID)
 					.include(pageContext.getRequest(), pageContext.getResponse());
 
