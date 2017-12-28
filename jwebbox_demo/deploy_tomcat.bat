@@ -7,7 +7,8 @@ md C:\tomcat7\logs
 rd /s/q /q C:\tomcat7\work
 md C:\tomcat7\work
 
-del C:\tomcat7\webapps\ROOT.war 
+rd /s/q /q C:\tomcat7\webapps
+md C:\tomcat7\webapps
 
 @echo on 
 cd target

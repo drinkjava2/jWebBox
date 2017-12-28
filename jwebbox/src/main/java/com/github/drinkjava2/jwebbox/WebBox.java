@@ -39,11 +39,11 @@ public class WebBox {
 	// If prepareBeanMethod is set, use it instead of use bean's "prepare" method
 	private String prepareBeanMethod;
 
-	private String prepareURL;// A URL, 2rd called, if have
+	private String prepareURL;// A URL, 3rd called, if have
 
-	private String text; // A text , 3rd output, if not empty
+	private String text; // A text , 4th output, if not empty
 
-	private String page;// A JSP page, 4th output, if not empty
+	private String page;// A JSP page, 5th output, if not empty
 
 	private Map<String, Object> attributeMap = new HashMap<String, Object>();
 

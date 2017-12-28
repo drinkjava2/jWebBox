@@ -1,23 +1,23 @@
-# jWebBox
+(English instruction please see [README-English.md](README-English.md))  
+### jWebBox
 **License:** [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0)  
  
-这是一个服务端JSP页面布局工具，功能和 Apache Tiles类似，特点是简单高效，仅有300行源码，实现了与Apache Tiles等效的布局功能。  
-在前后端分离的今天，服务端布局还是有必要存在的，因为它将数据准备和显示页面绑定，可以象搭积木一样实现显示层的模块式开发。  
+这是一个服务端(只支持JSP)页面布局工具，功能和 Apache Tiles类似，特点是简单，仅有300行源码，实现了与Apache Tiles等效的JSP页面布局功能。
 
-### 目前一些JSP服务端页面布局工具的缺点：
-Apache Tiles: 功能强大但过于臃肿，源码复杂，第三方库引用多，XML配置不方便，运行期动态生成配置能力差。  
-Sitemesh: 采用装饰器模式，性能差，功能也不如Tiles强大灵活。  
+#### 目前一些服务端JSP页面布局工具的缺点：
+* Apache Tiles: 功能强大但过于臃肿，源码复杂，第三方库引用多，XML配置不方便，运行期动态生成配置能力差。
+* Sitemesh: 采用装饰器模式，性能差，功能也不如Tiles强大灵活。  
+* JSP Layout或Stripes等JSP布局工具：功能不够强，在布局的继承或参数传递上有问题。
 
-### JWebBox优点：
-1)简单, 整个项目仅有300行源码，易于学习和扩充。  
-2)与jBeanBox和jSqlBox项目类似，用JAVA类代替XML配置（实际上前两个项目也是受此项目启发)，支持动态配置。  
-3)无侵入性，可以和其它页面布局工具如Tiles或Sitemesh混用，可用于整个网站的架构，也可用于编写页面局部零件。  
-4)除了servlet-api和jsp-api这两个Servlet运行期库外(由Servlet容器提供)，没有其它第三方库依赖。  
-5)支持静态方法、实例方法、URL引用三种数据准备方式。  
+#### JWebBox特点：
+1. 简单, 整个项目仅有一个Java类，300行源码，易于学习和扩充。
+2. 与jBeanBox和jSqlBox项目类似，用JAVA类代替XML配置（实际上前两个项目是受此项目启发)，支持动态配置，可以在运行期动态生成或修改布局。
+3. 无侵入性，可以和其它页面布局工具如Tiles或Sitemesh混用，可用于整个网站的架构，也可用于编写页面局部零件。
+4. 支持静态方法、实例方法、URL引用三种数据准备方式。
 
-### 使用方法：
-方式1：将WebBox.java源文件拷到项目的源码中即可  
-方式2：在项目的pom.xml中添加如下内容：
+#### 使用方法：
+* 方式1：将WebBox.java源文件拷到项目的源码中即可
+* 方式2：在项目的pom.xml中添加如下内容：
 ```
   <dependency>  
     <groupId>com.github.drinkjava2</groupId>
@@ -25,8 +25,9 @@ Sitemesh: 采用装饰器模式，性能差，功能也不如Tiles强大灵活�
     <version>2.1</version>  
   </dependency>
 ```
+jWebBox除了servlet-api和jsp-api这两个Servlet运行期库外(由Servlet容器提供)，没有用到其它第三方库。  
 
-### 详细介绍
+#### 详细介绍
 以下通过对示例的解释来详细说明jWebBox的使用，示例项目源码位于jwebbox-demo目录下，在项目的根目录，也有一个打包好的demo.war文件，可直接扔到Tomcat的webapps目录或webLogic的autodeploy目录下运行。
 
 #### 示例1 - 基本布局  
@@ -68,16 +69,27 @@ Sitemesh: 采用装饰器模式，性能差，功能也不如Tiles强大灵活�
  </body>
 </html>
 ```
-说明:   
-* setPage方法用于设定当前WebBox实例的目标页面，一个WebBox只能设定一个目标页面，WebBox构造器允许带一个页面参数。  
-* setAttribute方法用于向WebBox实例压入一个属性，可以为任意Java对象类型。  
-* 在JSP页面中调用showAttribute方法，将取出属性，如果是"/"开头的字符串表示的页面或一个WebBox实例，将显示它。 
- 
-示例1的页面截图如下：  
+
+说明:  
+* setPage方法用于设定当前WebBox实例的目标页面，一个WebBox只能设定一个目标页面，WebBox构造器允许带一个页面参数。 
+* setAttribute方法设置WebBox属性，可以为任意Java对象类型，相应地取值用getAttribute方法。
+* 在JSP页面中调用WebBox.showAttribute方法，将假定属性值代表一个页面或WebBox实例，并显示它。如果一个页面是由showAttribute方法显示的，用如下方法之一，可以在JSP页面中可以取得它的调用者的属性，例如： 
+```
+<%@page import="com.github.drinkjava2.jwebbox.WebBox"%>
+<%
+List<String> itemList = WebBox.getAttribute(pageContext,"itemList")
+//或
+ WebBox box = WebBox.getBox(pageContext);
+ List<String> itemList = box.getAttribute("itemList");
+%> 
+```
+
+示例1的显示截图：
 ![image](demo1.png)
 
+
 #### 示例2 - 布局的继承
-服务端代码如下：
+服务端代码：
 ```
   public static class DemoTopDown extends DemoHomePage {
     {   ((WebBox) this.getAttribute("menu")).setAttribute("msg", "Demo2 - Change body layout");
@@ -90,13 +102,14 @@ Sitemesh: 采用装饰器模式，性能差，功能也不如Tiles强大灵活�
     }
   }
 ```
-DemoTopDown继承于DemoHomePage类，唯一区别是将"body"属性改成了一个上下布局，使用top_down.jsp来作为布局模板，top_down.jsp和left_right.jsp两个布局比较简单，就不在这里列出了，请详见源码。
+DemoTopDown继承于DemoHomePage类，唯一区别是将"body"属性改成了一个上下布局，使用top_down.jsp来作为布局模板，top_down.jsp和left_right.jsp两个布局比较简单，就不在这里列出了，请详见源码。  
 
-示例2的页面截图如下：  
+示例2的显示截图：   
 ![image](demo2.png)
 
+
 #### 示例3 - 数据准备方法
-服务端代码如下：
+服务端代码：
 ```
   public static class DemoPrepareData extends DemoHomePage {
     {  setPrepareStaticMethod(DemoBoxConfig.class.getName() + ".changeMenu");
@@ -124,22 +137,19 @@ DemoTopDown继承于DemoHomePage类，唯一区别是将"body"属性改成了一
 ```
 jWebBox支持三种数据准备方式:  
 * setPrepareStaticMethod方法指定一个静态方法用于数据准备，注意这个方法必须具有PageContext和WebBox类型的两个参数。
-* setPrepareBean方法指定一个对象实列用于数据准备，用setPrepareBeanMethod来指定对象的方法名，如果不指定，将缺省使用"prepare"作为方法名。
+* setPrepareBean方法指定一个对象实例用于数据准备，用setPrepareBeanMethod来指定对象的方法名，如果不指定方法名，将缺省使用"prepare"作为方法名。
 * setPrepareURL方法将调用一个URL来作为数据谁备，注意这是一个服务端的URL引用，有权限访问/WEB-INF目录下的内容。
 * setText方法用于直接写一段HTML代码输出。
 
-各种准备方法及页面显示的顺序依次如下：  
-1. 静态方法prepareStaticMethod
-2. 实例方法prepareBeanMethod
-3. URL引用
-4. setText方法
-5. page页面
+各个方法及页面输出的顺序如下，可以看出，在最终的页面输出之前，可以有4个额外步骤进行数据准备及添加额外的输出内容：  
+prepareStaticMethod -> prepareBeanMethod -> URL -> text -> page  
 
-示例3的页面截图如下：  
+示例3的显示截图：   
 ![image](demo3.png)
 
+
 #### 示例4 - 列表
-服务端代码如下：
+服务端代码：
 ```
   public static class DemoList extends DemoHomePage {
     {
@@ -151,13 +161,14 @@ jWebBox支持三种数据准备方式:
     }
   }
 ```
-如果属性是一个列表，当JSP页面中用<% WebBox.showAttribute(pageContext,"body");%>方法调用时，将假定列表中内容为JSP页面或WebBox实例并依次显示它们。
+如果属性是一个列表，当JSP页面中调用<% WebBox.showAttribute(pageContext,"body");%>方法时，将假定列表中内容为JSP页面或WebBox实例并依次显示它们。
 
-示例4的页面截图如下：  
+示例4的显示截图：   
 ![image](demo4.png)
 
+
 #### 示例5 - 表格和分页演示
-这是一个WebBox各种方法的综合演示，展示利用WebBox来实现两个表格的显示和分页，以及处理表单提交的内容，这个示例比较长，只摘录了布局部分的代码，有兴趣的可以查看演示项目的源码：
+这是一个WebBox各种方法的综合演示，展示利用WebBox来显示两个表格和互不干拢的分页条，以及处理表单提交的数据。因篇幅原因，这个示例只摘录了布局部分代码，其余部分可以查看演示项目源码：
 ```
   public static class DemoTable extends DemoHomePage {
     {
@@ -211,8 +222,8 @@ jWebBox支持三种数据准备方式:
   }
 ```
 
-示例5的页面截图如下：  
-![image](demo4.png)
+示例5的显示截图：   
+![image](demo5.png)
 
 
-以上即为jWebBox的全部说明文档，作为一个源码只有300行的小项目，这个说明文档也算是够长的了。
+以上即为jWebBox的全部说明文档，如有不清楚处，可以查看示例项目的源码。

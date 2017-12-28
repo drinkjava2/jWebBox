@@ -1,5 +1,5 @@
 <div style="700px; clear:both;float:right; text-align:center;font-size:12px;padding-right:110px;">
-	  <form id="cmform" name="cmform" method="post" action="/demo/5" >
+	  <form id="cmform" name="cmform" method="post" action="<%=request.getContextPath()%>/demo/5" >
 		<table style="width:650px;"> 
 		<tr>
 			<td style="width:120px;">
