@@ -1,0 +1,1 @@
+<%@page import="com.github.drinkjava2.jwebbox.WebBox"%><p>This is table item <%=""+WebBox.getBoxAttribute("item")%>.</p>
