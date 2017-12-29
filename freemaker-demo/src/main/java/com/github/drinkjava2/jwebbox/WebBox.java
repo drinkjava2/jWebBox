@@ -18,8 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import javax.servlet.jsp.PageContext;
 
 /**
  * JWebBox is a small layout tool used in java server pages(JSP) projects,
@@ -65,161 +64,130 @@ public class WebBox {
 		this.setPage(page);
 	}
 
-	public static HttpServletRequest getHttpRequest() {
-		return RequestResponseHolder.getHttpRequest();
-	}
-
-	public static HttpServletResponse getHttpResponse() {
-		return RequestResponseHolder.getHttpResponse();
-	}
-
 	/** Check if String null or empty */
 	public static boolean isEmptyStr(String str) {
 		return (str == null || str.length() == 0);
 	}
 
 	/** Prepare data and show page */
-	public void show() {
-		prepareOnly();
+	public void show(PageContext pageContext) {
+		prepareOnly(pageContext);
 		if (text != null && text.length() > 0)
 			try {
-				getHttpResponse().getWriter().write(text);
+				pageContext.getOut().write(text);
 			} catch (IOException e) {
 				throw new WebBoxException(e);
 			}
-		showPageOrUrl(this.page, this);
+		showPageOrUrl(pageContext, this.page, this);
 	}
 
 	/** Prepare data only, call prepareStaticMethod and URL, do not show page */
-	public void prepareOnly() {
+	public void prepareOnly(PageContext pageContext) {
 		if (!isEmptyStr(prepareStaticMethod)) {
 			int index = prepareStaticMethod.lastIndexOf('.');
 			String className = prepareStaticMethod.substring(0, index);
 			String methodName = prepareStaticMethod.substring(index + 1, prepareStaticMethod.length());
 			if (isEmptyStr(className) || isEmptyStr(methodName))
 				throw new WebBoxException("Error#001: Can not call method: " + prepareStaticMethod);
-			executePrepareStaticMethod(className, methodName);
+			executePrepareStaticMethod(pageContext, className, methodName);
 		}
 		if (prepareBean != null)
-			executeBeanMethod();
-		showPageOrUrl(this.prepareURL, this);
+			executeBeanMethod(pageContext);
+		showPageOrUrl(pageContext, this.prepareURL, this);
 	}
 
-	private void executePrepareStaticMethod(String className, String methodName) {
+	private void executePrepareStaticMethod(PageContext pageContext, String className, String methodName) {
 		try {
 			Class<?> c = Class.forName(className);
-			Method m = c.getMethod(methodName, WebBox.class);
-			m.invoke(c, this); // Call a static method
+			Method m = c.getMethod(methodName, PageContext.class, WebBox.class);
+			m.invoke(c, pageContext, this); // Call a static method
 		} catch (Exception e) {
 			throw new WebBoxException(e);
 		}
 	}
 
-	private void executeBeanMethod() {
+	private void executeBeanMethod(PageContext pageContext) {
 		try {
 			Class<?> c = prepareBean.getClass();
 			String methodName = isEmptyStr(prepareBeanMethod) ? "prepare" : prepareBeanMethod;
-			Method m = c.getMethod(methodName, WebBox.class);
-			m.invoke(prepareBean, this); // Call a bean method
+			Method m = c.getMethod(methodName, PageContext.class, WebBox.class);
+			m.invoke(prepareBean, pageContext, this); // Call a bean method
 		} catch (Exception e) {
 			throw new WebBoxException(e);
 		}
 	}
 
 	/** Show page only, do not call prepareStaticMethod and URL */
-	public void showPageOnly() {
-		showPageOrUrl(this.page, this);
+	public void showPageOnly(PageContext pageContext) {
+		showPageOrUrl(pageContext, this.page, this);
 	}
 
 	/** Private method, use RequestDispatcher to show a URL or JSP page */
-	private static void showPageOrUrl(String pageOrUrl, WebBox caller) {
+	private static void showPageOrUrl(PageContext pageContext, String pageOrUrl, WebBox caller) {
 		if (isEmptyStr(pageOrUrl))
 			return;
 		Random rand = new Random();
-		HttpServletRequest request = getHttpRequest();
-		if (request == null)
-			throw new WebBoxException("Error#004: Can not find request in WebBox");
 		String boxCallerID = Long.toString(rand.nextLong()) + "_" + rand.nextLong() + "_" + rand.nextLong();
-		request.setAttribute("boxCallerID", boxCallerID);
-		request.setAttribute(boxCallerID, caller);// put caller
+		pageContext.getRequest().setAttribute(boxCallerID, caller);// put caller
 		try {
-			getHttpResponse().getWriter().flush();
+			pageContext.getOut().flush();
 		} catch (IOException e1) {
 			throw new WebBoxException(e1);
 		}
-		System.out.println("VVVVVVVVVVVVVVVVVVVVV");
-		System.out.println("showPageOrUrl request=" + getHttpRequest());
-		System.out.println("showPageOrUrl response=" + getHttpResponse());
-		System.out.println(pageOrUrl + ((pageOrUrl).indexOf("?") >= 0 ? "&" : "?") + "boxCallerID=" + boxCallerID);
 		try {
-			System.out.println("start include");
-			request.getRequestDispatcher(
-					pageOrUrl + ((pageOrUrl).indexOf("?") >= 0 ? "&" : "?") + "boxCallerID=" + boxCallerID)
-					.include(request, getHttpResponse());
-			System.out.println("end include");
-			System.out.println("^^^^^^^^^^^^^^^^^^^");
-
+			pageContext.getRequest()
+					.getRequestDispatcher(
+							pageOrUrl + ((pageOrUrl).indexOf("?") >= 0 ? "&" : "?") + "boxCallerID=" + boxCallerID)
+					.include(pageContext.getRequest(), pageContext.getResponse());
 		} catch (Exception e) {
 			throw new WebBoxException(e);
+		} finally {
+			pageContext.getRequest().removeAttribute(boxCallerID);
 		}
 	}
 
-	public static void printRequestInfo() {
-
-	}
-
-	/** Get current page's WebBox instance */
-	public static WebBox getBox() {
-		System.out.println(" VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV");
-		System.out.println("getBox request=" + getHttpRequest());
-		System.out.println("getBox response=" + getHttpResponse());
-		Debug.infoRequestAll(getHttpRequest());
-
-		String boxCallerID = getHttpRequest().getParameter("boxCallerID");
+	/** Get current pageContext's WebBox instance */
+	public static WebBox getBox(PageContext pageContext) {
+		String boxCallerID = pageContext.getRequest().getParameter("boxCallerID");
 		if (isEmptyStr(boxCallerID))
-			boxCallerID = (String) getHttpRequest().getAttribute("boxCallerID");
-		System.out.println("boxCallerID=" + boxCallerID);
-		System.out.println(" ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
-		if (isEmptyStr(boxCallerID)) {
-			throw new WebBoxException("Error#002: Can not find boxCallerID in request");
-		}
-		WebBox box = (WebBox) getHttpRequest().getAttribute(boxCallerID);
+			throw new WebBoxException("Error#002: Can not find boxCallerID in parameters");
+		WebBox box = (WebBox) pageContext.getRequest().getAttribute(boxCallerID);
 		if (box == null)
 			throw new WebBoxException("Error#003: Can not find caller box in pageContext");
 		return box;
 	}
 
 	/** Get an attribute from current page's WebBox instance */
-	public static <T> T getBoxAttribute(String attributeName) {
-		return getBox().getAttribute(attributeName);
+	public static <T> T getAttribute(PageContext pageContext, String attributeName) {
+		return getBox(pageContext).getAttribute(attributeName);
 	}
 
 	/** Assume the value is String or WebBox instance, show it */
-	public static void showBoxAttribute(String attributeName) {
-		Object obj = WebBox.getBoxAttribute(attributeName);
-		showObject(obj);
+	public static void showAttribute(PageContext pageContext, String attributeName) {
+		Object obj = WebBox.getAttribute(pageContext, attributeName);
+		showObject(pageContext, obj);
 	}
 
 	/**
 	 * Show an unknown object, object can be one of below: WebBox instance,
 	 * String,List of WebBox instance, List of String
 	 */
-	public static void showObject(Object obj) {
+	public static void showObject(PageContext pageContext, Object obj) {
 		if (obj == null)
 			return;
 		if (obj instanceof WebBox)
-			((WebBox) obj).show();
+			((WebBox) obj).show(pageContext);
 		else if (obj instanceof ArrayList<?>) {
 			for (Object item : (ArrayList<?>) obj) {
-				showObject(item);
+				showObject(pageContext, item);
 			}
 		} else if (obj instanceof String) {
 			String str = "" + obj;
 			if (str.startsWith("/")) {
-				showPageOrUrl(str, getBox());
+				showPageOrUrl(pageContext, str, getBox(pageContext));
 			} else {
 				try {
-					getHttpResponse().getWriter().write(str);
+					pageContext.getOut().write(str);
 				} catch (IOException e) {
 					throw new WebBoxException(e);
 				}

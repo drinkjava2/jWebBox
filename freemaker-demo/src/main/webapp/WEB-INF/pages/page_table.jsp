@@ -1,6 +1,6 @@
 <%@page import="java.util.List"%><%@page import="com.github.drinkjava2.jwebbox.WebBox"%>
 <%
-WebBox box = WebBox.getBox();
+WebBox box = WebBox.getBox(pageContext);
 	List<String> itemList = box.getAttribute("itemList");
 	int row = (Integer) box.getAttribute("row");
 	int col = (Integer) box.getAttribute("col");
@@ -15,7 +15,7 @@ WebBox box = WebBox.getBox();
 				out.write("<td>");
 				if(index<itemList.size()){
 				  render.setAttribute("item", itemList.get(index++)); 
-				  render.show(); 
+				  render.show(pageContext); 
 				}
 				out.write("<td/>");
 			}

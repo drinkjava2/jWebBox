@@ -54,9 +54,9 @@ static String getPageLink(HttpServletRequest request, int pageNumber, String pag
 %>
 
 <%
-String paginId=WebBox.getBoxAttribute("pageId");
-int pageNo=(Integer)WebBox.getBoxAttribute( paginId+"_pageNo");  
-int totalPage=(Integer)WebBox.getBoxAttribute( "totalPage");
+String paginId=WebBox.getAttribute(pageContext, "pageId");
+int pageNo=(Integer)WebBox.getAttribute(pageContext, paginId+"_pageNo");  
+int totalPage=(Integer)WebBox.getAttribute(pageContext, "totalPage");
 
 	int N = 6;
 	int from;

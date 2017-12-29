@@ -6,6 +6,6 @@
 <a href="<%=request.getContextPath()%>/demo/5">Demo5</a>&nbsp;
 <br />
 <br />
-<%	WebBox.showBoxAttribute("msg");%>
+<%	WebBox.showAttribute(pageContext,"msg");%>
 <br />
 <br />

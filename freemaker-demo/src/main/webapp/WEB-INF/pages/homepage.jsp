@@ -1,6 +1,7 @@
+<%@ taglib prefix="box" uri="/WEB-INF/jwebbox.tld"%>
+<%@page import="com.github.drinkjava2.jwebbox.WebBox"%> 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
-<%@page import="com.github.drinkjava2.jwebbox.WebBox"%> 
 <head>
 <style type="text/css">
 #temp_content {width: 900px; margin: auto; background-color:#EEEEEE;} 
@@ -13,13 +14,13 @@
 		<div id="temp_content">
 			<div id="temp_menu">
 				<div align="center">
-				<% WebBox.showBoxAttribute("menu");%>
+ 				    <box:show attribute="menu" />
 				</div>
 			</div>
-				<% WebBox.showBoxAttribute("body");%>
+			 	<box:show attribute="body" />
 			<div id="temp_footer">
 				<div align="center">
-				<% WebBox.showBoxAttribute("footer");%>
+				<% com.github.drinkjava2.jwebbox.WebBox.showAttribute(pageContext,"footer");%>
 				</div>
 			</div>	
 		</div>

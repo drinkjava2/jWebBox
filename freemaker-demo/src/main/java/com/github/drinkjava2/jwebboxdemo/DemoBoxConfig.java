@@ -1,11 +1,10 @@
 package com.github.drinkjava2.jwebboxdemo;
 
-import static com.github.drinkjava2.jwebbox.WebBox.getHttpRequest;
-import static com.github.drinkjava2.jwebbox.WebBox.getHttpResponse;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.servlet.jsp.PageContext;
 
 import com.github.drinkjava2.jwebbox.WebBox;
 
@@ -14,21 +13,21 @@ public class DemoBoxConfig {
 	// Demo1 - HomePage
 	public static class DemoHomePage extends WebBox {
 		{
-			this.setPage("/pages/homepage.jsp"); 
+			this.setPage("/WEB-INF/pages/homepage.jsp"); 
 			this.setAttribute("menu",
-					new WebBox("/pages/menu.jsp").setAttribute("msg", "Demo1 - A basic layout"));
+					new WebBox("/WEB-INF/pages/menu.jsp").setAttribute("msg", "Demo1 - A basic layout"));
 			this.setAttribute("body", new LeftRightLayout());
-			this.setAttribute("footer",  new WebBox( "/pages/footer.jsp"));
+			this.setAttribute("footer",  new WebBox( "/WEB-INF/pages/footer.jsp"));
 		}
 	}
 	
 	// Left right layout
 	public static class LeftRightLayout extends WebBox {
 		{
-			this.setPage("/pages/left_right.jsp");
+			this.setPage("/WEB-INF/pages/left_right.jsp");
 			ArrayList<WebBox> boxlist = new ArrayList<WebBox>();
-			boxlist.add(new WebBox().setPage("/pages/page1.jsp"));
-			boxlist.add(new WebBox().setPage("/pages/page2.jsp"));
+			boxlist.add(new WebBox().setPage("/WEB-INF/pages/page1.jsp"));
+			boxlist.add(new WebBox().setPage("/WEB-INF/pages/page2.jsp"));
 			this.setAttribute("boxlist", boxlist);
 		}
 	}  
@@ -44,7 +43,7 @@ public class DemoBoxConfig {
 	// Top down layout
 	public static class TopDownLayout extends LeftRightLayout {
 		{
-			this.setPage("/pages/top_down.jsp");
+			this.setPage("/WEB-INF/pages/top_down.jsp");
 		}
 	}
 	
@@ -53,24 +52,24 @@ public class DemoBoxConfig {
 		{
 			setPrepareStaticMethod(DemoBoxConfig.class.getName() + ".changeMenu");
 			setAttribute("body", new WebBox().setText("<div style=\"width:900px\"> This is body </div>")
-					.setPrepareURL("/pages/prepare.jsp").setPrepareBean(new Printer()));
-			setAttribute("footer", new WebBox("/pages/footer.jsp").setPrepareBean(new Printer())
+					.setPrepareURL("/WEB-INF/pages/prepare.jsp").setPrepareBean(new Printer()));
+			setAttribute("footer", new WebBox("/WEB-INF/pages/footer.jsp").setPrepareBean(new Printer())
 					.setPrepareBeanMethod("print"));
 		}
 	}
 
-	public static void changeMenu( WebBox callerBox) throws IOException {
+	public static void changeMenu(PageContext pageContext, WebBox callerBox) throws IOException {
 		((WebBox) callerBox.getAttribute("menu")).setAttribute("msg", "Demo3 - Prepare methods");
 	}
 
 	public static class Printer {
-		public void prepare(WebBox callerBox) throws IOException {
-			getHttpResponse().getWriter().write("This is printed by Printer's default prepare method <br/>");
+		public void prepare(PageContext pageContext, WebBox callerBox) throws IOException {
+			pageContext.getOut().write("This is printed by Printer's default prepare method <br/>");
 		}
 
-		public void print( WebBox callerBox) throws IOException {
-			getHttpResponse().getWriter().write("This is printed by Printer's print method <br/>");
-			getHttpResponse().getWriter().write((String) getHttpRequest().getAttribute("urlPrepare"));
+		public void print(PageContext pageContext, WebBox callerBox) throws IOException {
+			pageContext.getOut().write("This is printed by Printer's print method <br/>");
+			pageContext.getOut().write((String) pageContext.getRequest().getAttribute("urlPrepare"));
 		}
 	}
 
@@ -80,7 +79,7 @@ public class DemoBoxConfig {
 			((WebBox) this.getAttribute("menu")).setAttribute("msg", "Demo4 - List");
 			ArrayList<Object> boxlist1 = new ArrayList<Object>();
 			for (int i = 1; i <= 3; i++)
-				boxlist1.add(new WebBox().setPage("/pages/page" + i + ".jsp"));
+				boxlist1.add(new WebBox().setPage("/WEB-INF/pages/page" + i + ".jsp"));
 			this.setAttribute("body", boxlist1);
 		}
 	}
@@ -95,25 +94,25 @@ public class DemoBoxConfig {
 		}
 	}
 
-	public static void receiveCommentPost( WebBox callerBox) {
-		if (WebBox.isEmptyStr(getHttpRequest().getParameter("isCommentSumbit")))
+	public static void receiveCommentPost(PageContext pageContext, WebBox callerBox) {
+		if (WebBox.isEmptyStr(pageContext.getRequest().getParameter("isCommentSumbit")))
 			return;
-		String comment =getHttpRequest().getParameter("comment");
+		String comment = pageContext.getRequest().getParameter("comment");
 		if (WebBox.isEmptyStr(comment))
-			getHttpRequest().setAttribute("errorMSG", "Comment can not be empty");
+			pageContext.getRequest().setAttribute("errorMSG", "Comment can not be empty");
 		else
 			commentDummyData.add(0, comment);
 	}
 
 	public static class PrepareDemo5 {
-		private int getPageNo( String pageId) {
-			String pageNo = (String) getHttpRequest().getParameter(pageId + "_pageNo");
+		private int getPageNo(PageContext pageContext, String pageId) {
+			String pageNo = (String) pageContext.getRequest().getParameter(pageId + "_pageNo");
 			return pageNo == null ? 1 : Integer.valueOf(pageNo);
 		}
 
-		public void prepareTable( WebBox callerBox) throws IOException {
+		public void prepareTable(PageContext pageContext, WebBox callerBox) throws IOException {
 			String pageId = callerBox.getAttribute("pageId");
-			int pageNo = getPageNo( pageId);
+			int pageNo = getPageNo(pageContext, pageId);
 			int countPerPage = (Integer) callerBox.getAttribute("row") * (Integer) callerBox.getAttribute("col");
 			List<String> targetList = callerBox.getAttribute("targetList");
 			ArrayList<String> itemList = new ArrayList<String>();
@@ -123,10 +122,10 @@ public class DemoBoxConfig {
 			callerBox.setAttribute("itemList", itemList);
 		}
 
-		public void preparePaginBar( WebBox callerBox) throws IOException {
+		public void preparePaginBar(PageContext pageContext, WebBox callerBox) throws IOException {
 			String pageId = callerBox.getAttribute("pageId");
 			List<String> targetList = callerBox.getAttribute("targetList");
-			int pageNo = getPageNo( pageId);
+			int pageNo = getPageNo(pageContext, pageId);
 			int countPerPage = (Integer) callerBox.getAttribute("row") * (Integer) callerBox.getAttribute("col");
 			int totalPage = (int) Math.ceil(1.0 * targetList.size() / countPerPage);
 			callerBox.setAttribute(pageId + "_pageNo", pageNo);
@@ -145,7 +144,7 @@ public class DemoBoxConfig {
 					"<br/>-----------------------------------------------------------------------------------"));
 			bodyList.add(new CommentBox());
 			bodyList.add(new CommentPaginBarBox());
-			bodyList.add(new WebBox("/pages/commentform.jsp"));
+			bodyList.add(new WebBox("/WEB-INF/pages/commentform.jsp"));
 			this.setPrepareStaticMethod(DemoBoxConfig.class.getName() + ".receiveCommentPost");
 			this.setAttribute("body", bodyList);
 		}
@@ -153,18 +152,18 @@ public class DemoBoxConfig {
 		class TableBox extends WebBox {
 			{
 				this.setPrepareBean(new PrepareDemo5()).setPrepareBeanMethod("prepareTable");
-				setPage("/pages/page_table.jsp");
+				setPage("/WEB-INF/pages/page_table.jsp");
 				setAttribute("pageId", "table");
 				setAttribute("targetList", tableDummyData);
 				setAttribute("row", 3).setAttribute("col", 4);
-				setAttribute("render", new WebBox("/pages/render_table.jsp"));
+				setAttribute("render", new WebBox("/WEB-INF/pages/render_table.jsp"));
 			}
 		}
 
 		class TablePaginBarBox extends TableBox {
 			{
 				this.setPrepareBean(new PrepareDemo5()).setPrepareBeanMethod("preparePaginBar");
-				setPage("/pages/pagin_bar.jsp");
+				setPage("/WEB-INF/pages/pagin_bar.jsp");
 			}
 		}
 
@@ -173,14 +172,14 @@ public class DemoBoxConfig {
 				setAttribute("pageId", "comment");
 				setAttribute("targetList", commentDummyData);
 				setAttribute("row", 3).setAttribute("col", 1);
-				setAttribute("render", new WebBox("/pages/render_comment.jsp"));
+				setAttribute("render", new WebBox("/WEB-INF/pages/render_comment.jsp"));
 			}
 		}
 
 		class CommentPaginBarBox extends CommentBox {
 			{
 				this.setPrepareBean(new PrepareDemo5()).setPrepareBeanMethod("preparePaginBar");
-				setPage("/pages/pagin_bar.jsp");
+				setPage("/WEB-INF/pages/pagin_bar.jsp");
 			}
 		}
 	}
