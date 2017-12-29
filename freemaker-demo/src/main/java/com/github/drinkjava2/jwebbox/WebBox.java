@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
-import static com.github.drinkjava2.jwebbox.ThreadContextHolder.*;
+import static com.github.drinkjava2.jwebbox.RequestResponseHolder.*;
 
 
 /**

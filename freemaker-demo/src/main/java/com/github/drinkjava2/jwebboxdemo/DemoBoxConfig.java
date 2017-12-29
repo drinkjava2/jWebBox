@@ -3,8 +3,8 @@ package com.github.drinkjava2.jwebboxdemo;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.servlet.jsp.PageContext;
+ 
+import static com.github.drinkjava2.jwebbox.RequestResponseHolder.*;
 
 import com.github.drinkjava2.jwebbox.WebBox;
 
@@ -58,18 +58,18 @@ public class DemoBoxConfig {
 		}
 	}
 
-	public static void changeMenu(PageContext pageContext, WebBox callerBox) throws IOException {
+	public static void changeMenu( WebBox callerBox) throws IOException {
 		((WebBox) callerBox.getAttribute("menu")).setAttribute("msg", "Demo3 - Prepare methods");
 	}
 
 	public static class Printer {
-		public void prepare(PageContext pageContext, WebBox callerBox) throws IOException {
-			pageContext.getOut().write("This is printed by Printer's default prepare method <br/>");
+		public void prepare(WebBox callerBox) throws IOException {
+			getHttpResponse().getWriter().write("This is printed by Printer's default prepare method <br/>");
 		}
 
-		public void print(PageContext pageContext, WebBox callerBox) throws IOException {
-			pageContext.getOut().write("This is printed by Printer's print method <br/>");
-			pageContext.getOut().write((String) pageContext.getRequest().getAttribute("urlPrepare"));
+		public void print( WebBox callerBox) throws IOException {
+			getHttpResponse().getWriter().write("This is printed by Printer's print method <br/>");
+			getHttpResponse().getWriter().write((String) getHttpRequest().getAttribute("urlPrepare"));
 		}
 	}
 
@@ -94,25 +94,25 @@ public class DemoBoxConfig {
 		}
 	}
 
-	public static void receiveCommentPost(PageContext pageContext, WebBox callerBox) {
-		if (WebBox.isEmptyStr(pageContext.getRequest().getParameter("isCommentSumbit")))
+	public static void receiveCommentPost( WebBox callerBox) {
+		if (WebBox.isEmptyStr(getHttpRequest().getParameter("isCommentSumbit")))
 			return;
-		String comment = pageContext.getRequest().getParameter("comment");
+		String comment =getHttpRequest().getParameter("comment");
 		if (WebBox.isEmptyStr(comment))
-			pageContext.getRequest().setAttribute("errorMSG", "Comment can not be empty");
+			getHttpRequest().setAttribute("errorMSG", "Comment can not be empty");
 		else
 			commentDummyData.add(0, comment);
 	}
 
 	public static class PrepareDemo5 {
-		private int getPageNo(PageContext pageContext, String pageId) {
-			String pageNo = (String) pageContext.getRequest().getParameter(pageId + "_pageNo");
+		private int getPageNo( String pageId) {
+			String pageNo = (String) getHttpRequest().getParameter(pageId + "_pageNo");
 			return pageNo == null ? 1 : Integer.valueOf(pageNo);
 		}
 
-		public void prepareTable(PageContext pageContext, WebBox callerBox) throws IOException {
+		public void prepareTable( WebBox callerBox) throws IOException {
 			String pageId = callerBox.getAttribute("pageId");
-			int pageNo = getPageNo(pageContext, pageId);
+			int pageNo = getPageNo( pageId);
 			int countPerPage = (Integer) callerBox.getAttribute("row") * (Integer) callerBox.getAttribute("col");
 			List<String> targetList = callerBox.getAttribute("targetList");
 			ArrayList<String> itemList = new ArrayList<String>();
@@ -122,10 +122,10 @@ public class DemoBoxConfig {
 			callerBox.setAttribute("itemList", itemList);
 		}
 
-		public void preparePaginBar(PageContext pageContext, WebBox callerBox) throws IOException {
+		public void preparePaginBar( WebBox callerBox) throws IOException {
 			String pageId = callerBox.getAttribute("pageId");
 			List<String> targetList = callerBox.getAttribute("targetList");
-			int pageNo = getPageNo(pageContext, pageId);
+			int pageNo = getPageNo( pageId);
 			int countPerPage = (Integer) callerBox.getAttribute("row") * (Integer) callerBox.getAttribute("col");
 			int totalPage = (int) Math.ceil(1.0 * targetList.size() / countPerPage);
 			callerBox.setAttribute(pageId + "_pageNo", pageNo);

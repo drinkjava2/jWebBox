@@ -23,7 +23,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * ThreadContextHolder used to keep request and response in threadLocal
+ * RequestResponseHolder used to keep request and response in threadLocal
  * variants, to use it at the beginning of a http request, need call
  * setHttpRequest or setHttpResponse first, usually set a servlet in web.xml do
  * this job
@@ -31,16 +31,17 @@ import javax.servlet.http.HttpServletResponse;
  * @author Yong Zhu(yong9981@gmail.com)
  * @since 2.1
  */
-public class ThreadContextHolder implements Filter {
+public class RequestResponseHolder implements Filter {
 	private static ThreadLocal<HttpServletRequest> HttpRequestThreadLocalHolder = new ThreadLocal<HttpServletRequest>();
 	private static ThreadLocal<HttpServletResponse> HttpResponseThreadLocalHolder = new ThreadLocal<HttpServletResponse>();
 
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
-			throws IOException, ServletException {
-		HttpRequestThreadLocalHolder.set((HttpServletRequest) request);
-		HttpResponseThreadLocalHolder.set((HttpServletResponse) response);
+			throws IOException, ServletException {		
 		System.out.println("In filter");
+		System.out.println("keep request="+request); 
+		HttpRequestThreadLocalHolder.set((HttpServletRequest) request);
+		HttpResponseThreadLocalHolder.set((HttpServletResponse) response); 
 		chain.doFilter(request, response);
 	}
 
@@ -49,23 +50,17 @@ public class ThreadContextHolder implements Filter {
 	}
 
 	@Override
-	public void destroy() {
-		HttpRequestThreadLocalHolder.remove();
-		HttpResponseThreadLocalHolder.remove();
+	public void destroy() { 
 	}
 
 	// ======== getter & setter========
-
-	public static void setHttpRequestHttpResponse(HttpServletRequest request, HttpServletResponse response) {
-		HttpRequestThreadLocalHolder.set(request);
-		HttpResponseThreadLocalHolder.set(response);
-	}
 
 	public static void setHttpRequest(HttpServletRequest request) {
 		HttpRequestThreadLocalHolder.set(request);
 	}
 
 	public static HttpServletRequest getHttpRequest() {
+		System.out.println("get request="+HttpRequestThreadLocalHolder.get());
 		return HttpRequestThreadLocalHolder.get();
 	}
 

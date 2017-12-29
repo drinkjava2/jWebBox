@@ -1,5 +1,6 @@
 <%@page import="com.github.drinkjava2.jwebboxdemo.DemoBoxConfig.*"%>
 <%
+    System.out.println("JSP request="+request);
 	String uri = request.getRequestURI();
 	if (uri.contains("/demo/2"))
 		new DemoTopDown().show();
