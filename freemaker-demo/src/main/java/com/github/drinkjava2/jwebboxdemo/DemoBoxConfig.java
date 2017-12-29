@@ -1,10 +1,11 @@
 package com.github.drinkjava2.jwebboxdemo;
 
+import static com.github.drinkjava2.jwebbox.WebBox.getHttpRequest;
+import static com.github.drinkjava2.jwebbox.WebBox.getHttpResponse;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
- 
-import static com.github.drinkjava2.jwebbox.RequestResponseHolder.*;
 
 import com.github.drinkjava2.jwebbox.WebBox;
 
@@ -13,21 +14,21 @@ public class DemoBoxConfig {
 	// Demo1 - HomePage
 	public static class DemoHomePage extends WebBox {
 		{
-			this.setPage("/WEB-INF/pages/homepage.jsp"); 
+			this.setPage("/pages/homepage.jsp"); 
 			this.setAttribute("menu",
-					new WebBox("/WEB-INF/pages/menu.jsp").setAttribute("msg", "Demo1 - A basic layout"));
+					new WebBox("/pages/menu.jsp").setAttribute("msg", "Demo1 - A basic layout"));
 			this.setAttribute("body", new LeftRightLayout());
-			this.setAttribute("footer",  new WebBox( "/WEB-INF/pages/footer.jsp"));
+			this.setAttribute("footer",  new WebBox( "/pages/footer.jsp"));
 		}
 	}
 	
 	// Left right layout
 	public static class LeftRightLayout extends WebBox {
 		{
-			this.setPage("/WEB-INF/pages/left_right.jsp");
+			this.setPage("/pages/left_right.jsp");
 			ArrayList<WebBox> boxlist = new ArrayList<WebBox>();
-			boxlist.add(new WebBox().setPage("/WEB-INF/pages/page1.jsp"));
-			boxlist.add(new WebBox().setPage("/WEB-INF/pages/page2.jsp"));
+			boxlist.add(new WebBox().setPage("/pages/page1.jsp"));
+			boxlist.add(new WebBox().setPage("/pages/page2.jsp"));
 			this.setAttribute("boxlist", boxlist);
 		}
 	}  
@@ -43,7 +44,7 @@ public class DemoBoxConfig {
 	// Top down layout
 	public static class TopDownLayout extends LeftRightLayout {
 		{
-			this.setPage("/WEB-INF/pages/top_down.jsp");
+			this.setPage("/pages/top_down.jsp");
 		}
 	}
 	
@@ -52,8 +53,8 @@ public class DemoBoxConfig {
 		{
 			setPrepareStaticMethod(DemoBoxConfig.class.getName() + ".changeMenu");
 			setAttribute("body", new WebBox().setText("<div style=\"width:900px\"> This is body </div>")
-					.setPrepareURL("/WEB-INF/pages/prepare.jsp").setPrepareBean(new Printer()));
-			setAttribute("footer", new WebBox("/WEB-INF/pages/footer.jsp").setPrepareBean(new Printer())
+					.setPrepareURL("/pages/prepare.jsp").setPrepareBean(new Printer()));
+			setAttribute("footer", new WebBox("/pages/footer.jsp").setPrepareBean(new Printer())
 					.setPrepareBeanMethod("print"));
 		}
 	}
@@ -79,7 +80,7 @@ public class DemoBoxConfig {
 			((WebBox) this.getAttribute("menu")).setAttribute("msg", "Demo4 - List");
 			ArrayList<Object> boxlist1 = new ArrayList<Object>();
 			for (int i = 1; i <= 3; i++)
-				boxlist1.add(new WebBox().setPage("/WEB-INF/pages/page" + i + ".jsp"));
+				boxlist1.add(new WebBox().setPage("/pages/page" + i + ".jsp"));
 			this.setAttribute("body", boxlist1);
 		}
 	}
@@ -144,7 +145,7 @@ public class DemoBoxConfig {
 					"<br/>-----------------------------------------------------------------------------------"));
 			bodyList.add(new CommentBox());
 			bodyList.add(new CommentPaginBarBox());
-			bodyList.add(new WebBox("/WEB-INF/pages/commentform.jsp"));
+			bodyList.add(new WebBox("/pages/commentform.jsp"));
 			this.setPrepareStaticMethod(DemoBoxConfig.class.getName() + ".receiveCommentPost");
 			this.setAttribute("body", bodyList);
 		}
@@ -152,18 +153,18 @@ public class DemoBoxConfig {
 		class TableBox extends WebBox {
 			{
 				this.setPrepareBean(new PrepareDemo5()).setPrepareBeanMethod("prepareTable");
-				setPage("/WEB-INF/pages/page_table.jsp");
+				setPage("/pages/page_table.jsp");
 				setAttribute("pageId", "table");
 				setAttribute("targetList", tableDummyData);
 				setAttribute("row", 3).setAttribute("col", 4);
-				setAttribute("render", new WebBox("/WEB-INF/pages/render_table.jsp"));
+				setAttribute("render", new WebBox("/pages/render_table.jsp"));
 			}
 		}
 
 		class TablePaginBarBox extends TableBox {
 			{
 				this.setPrepareBean(new PrepareDemo5()).setPrepareBeanMethod("preparePaginBar");
-				setPage("/WEB-INF/pages/pagin_bar.jsp");
+				setPage("/pages/pagin_bar.jsp");
 			}
 		}
 
@@ -172,14 +173,14 @@ public class DemoBoxConfig {
 				setAttribute("pageId", "comment");
 				setAttribute("targetList", commentDummyData);
 				setAttribute("row", 3).setAttribute("col", 1);
-				setAttribute("render", new WebBox("/WEB-INF/pages/render_comment.jsp"));
+				setAttribute("render", new WebBox("/pages/render_comment.jsp"));
 			}
 		}
 
 		class CommentPaginBarBox extends CommentBox {
 			{
 				this.setPrepareBean(new PrepareDemo5()).setPrepareBeanMethod("preparePaginBar");
-				setPage("/WEB-INF/pages/pagin_bar.jsp");
+				setPage("/pages/pagin_bar.jsp");
 			}
 		}
 	}

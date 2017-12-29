@@ -17,8 +17,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
-import static com.github.drinkjava2.jwebbox.RequestResponseHolder.*;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * JWebBox is a small layout tool used in java server pages(JSP) projects,
@@ -36,7 +37,8 @@ public class WebBox {
 	// A Bean have a "prepare" methods to prepare data, 2nd called
 	private Object prepareBean;
 
-	// If prepareBeanMethod is set, use it instead of use bean's "prepare" method
+	// If prepareBeanMethod is set, use it instead of use bean's "prepare"
+	// method
 	private String prepareBeanMethod;
 
 	private String prepareURL;// A URL, 3rd called, if have
@@ -52,14 +54,23 @@ public class WebBox {
 	public WebBox() {
 		// default constructor
 	}
- 
+
 	/**
 	 * Create a WebBox
 	 * 
-	 * @param page The JSP file location, an example: "/template/abc.jsp"
+	 * @param page
+	 *            The JSP file location, an example: "/template/abc.jsp"
 	 */
 	public WebBox(String page) {
 		this.setPage(page);
+	}
+
+	public static HttpServletRequest getHttpRequest() {
+		return RequestResponseHolder.getHttpRequest();
+	}
+
+	public static HttpServletResponse getHttpResponse() {
+		return RequestResponseHolder.getHttpResponse();
 	}
 
 	/** Check if String null or empty */
@@ -68,8 +79,8 @@ public class WebBox {
 	}
 
 	/** Prepare data and show page */
-	public void show( ) {
-		prepareOnly( );
+	public void show() {
+		prepareOnly();
 		if (text != null && text.length() > 0)
 			try {
 				getHttpResponse().getWriter().write(text);
@@ -87,14 +98,14 @@ public class WebBox {
 			String methodName = prepareStaticMethod.substring(index + 1, prepareStaticMethod.length());
 			if (isEmptyStr(className) || isEmptyStr(methodName))
 				throw new WebBoxException("Error#001: Can not call method: " + prepareStaticMethod);
-			executePrepareStaticMethod( className, methodName);
+			executePrepareStaticMethod(className, methodName);
 		}
 		if (prepareBean != null)
 			executeBeanMethod();
-		showPageOrUrl( this.prepareURL, this);
+		showPageOrUrl(this.prepareURL, this);
 	}
 
-	private void executePrepareStaticMethod( String className, String methodName) {
+	private void executePrepareStaticMethod(String className, String methodName) {
 		try {
 			Class<?> c = Class.forName(className);
 			Method m = c.getMethod(methodName, WebBox.class);
@@ -104,7 +115,7 @@ public class WebBox {
 		}
 	}
 
-	private void executeBeanMethod( ) {
+	private void executeBeanMethod() {
 		try {
 			Class<?> c = prepareBean.getClass();
 			String methodName = isEmptyStr(prepareBeanMethod) ? "prepare" : prepareBeanMethod;
@@ -121,33 +132,57 @@ public class WebBox {
 	}
 
 	/** Private method, use RequestDispatcher to show a URL or JSP page */
-	private static void showPageOrUrl( String pageOrUrl, WebBox caller) {
+	private static void showPageOrUrl(String pageOrUrl, WebBox caller) {
 		if (isEmptyStr(pageOrUrl))
 			return;
 		Random rand = new Random();
+		HttpServletRequest request = getHttpRequest();
+		if (request == null)
+			throw new WebBoxException("Error#004: Can not find request in WebBox");
 		String boxCallerID = Long.toString(rand.nextLong()) + "_" + rand.nextLong() + "_" + rand.nextLong();
-		getHttpRequest().setAttribute(boxCallerID, caller);// put caller
+		request.setAttribute("boxCallerID", boxCallerID);
+		request.setAttribute(boxCallerID, caller);// put caller
 		try {
 			getHttpResponse().getWriter().flush();
 		} catch (IOException e1) {
 			throw new WebBoxException(e1);
 		}
+		System.out.println("VVVVVVVVVVVVVVVVVVVVV");
+		System.out.println("showPageOrUrl request=" + getHttpRequest());
+		System.out.println("showPageOrUrl response=" + getHttpResponse());
+		System.out.println(pageOrUrl + ((pageOrUrl).indexOf("?") >= 0 ? "&" : "?") + "boxCallerID=" + boxCallerID);
 		try {
-			getHttpRequest()
-					.getRequestDispatcher(
-							pageOrUrl + ((pageOrUrl).indexOf("?") >= 0 ? "&" : "?") + "boxCallerID=" + boxCallerID)
-					.include(getHttpRequest(), getHttpResponse());
+			System.out.println("start include");
+			request.getRequestDispatcher(
+					pageOrUrl + ((pageOrUrl).indexOf("?") >= 0 ? "&" : "?") + "boxCallerID=" + boxCallerID)
+					.include(request, getHttpResponse());
+			System.out.println("end include");
+			System.out.println("^^^^^^^^^^^^^^^^^^^");
 
 		} catch (Exception e) {
 			throw new WebBoxException(e);
 		}
 	}
 
+	public static void printRequestInfo() {
+
+	}
+
 	/** Get current page's WebBox instance */
-	public static WebBox getBox( ) {
+	public static WebBox getBox() {
+		System.out.println(" VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV");
+		System.out.println("getBox request=" + getHttpRequest());
+		System.out.println("getBox response=" + getHttpResponse());
+		Debug.infoRequestAll(getHttpRequest());
+
 		String boxCallerID = getHttpRequest().getParameter("boxCallerID");
 		if (isEmptyStr(boxCallerID))
-			throw new WebBoxException("Error#002: Can not find boxCallerID in parameters");
+			boxCallerID = (String) getHttpRequest().getAttribute("boxCallerID");
+		System.out.println("boxCallerID=" + boxCallerID);
+		System.out.println(" ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
+		if (isEmptyStr(boxCallerID)) {
+			throw new WebBoxException("Error#002: Can not find boxCallerID in request");
+		}
 		WebBox box = (WebBox) getHttpRequest().getAttribute(boxCallerID);
 		if (box == null)
 			throw new WebBoxException("Error#003: Can not find caller box in pageContext");
@@ -155,12 +190,12 @@ public class WebBox {
 	}
 
 	/** Get an attribute from current page's WebBox instance */
-	public static <T> T getBoxAttribute( String attributeName) {
+	public static <T> T getBoxAttribute(String attributeName) {
 		return getBox().getAttribute(attributeName);
 	}
 
 	/** Assume the value is String or WebBox instance, show it */
-	public static void showBoxAttribute(  String attributeName) {
+	public static void showBoxAttribute(String attributeName) {
 		Object obj = WebBox.getBoxAttribute(attributeName);
 		showObject(obj);
 	}
@@ -169,7 +204,7 @@ public class WebBox {
 	 * Show an unknown object, object can be one of below: WebBox instance,
 	 * String,List of WebBox instance, List of String
 	 */
-	public static void showObject(  Object obj) {
+	public static void showObject(Object obj) {
 		if (obj == null)
 			return;
 		if (obj instanceof WebBox)
@@ -285,7 +320,7 @@ public class WebBox {
 		}
 
 		public WebBoxException(Throwable e) {
-			super(e); 
+			super(e);
 		}
 	}
 }

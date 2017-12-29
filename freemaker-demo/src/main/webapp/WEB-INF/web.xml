@@ -3,8 +3,9 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
 	version="3.0"> 
+	
 <!-- RequestResponseHolder is used to store request and response in threadLocal for WebBox use -->	
-  <filter>
+  <!--filter>
     <filter-name>RequestResponseHolder</filter-name>
     <filter-class>com.github.drinkjava2.jwebbox.RequestResponseHolder</filter-class>
   </filter>
@@ -14,8 +15,16 @@
     <dispatcher>REQUEST</dispatcher>
     <dispatcher>FORWARD</dispatcher>
     <dispatcher>INCLUDE</dispatcher>
-  </filter-mapping>
-  
+  </filter-mapping--> 
+ 
+    <!--filter>  
+        <filter-name>requestContextFilter</filter-name>  
+        <filter-class>org.springframework.web.filter.RequestContextFilter</filter-class>  
+    </filter>  
+    <filter-mapping>  
+        <filter-name>requestContextFilter</filter-name>  
+        <url-pattern>/*</url-pattern>  
+    </filter-mapping-->  
   
 <!-- FreemarkerServlet settings, see http://www.zheng-hang.com/chm/freemarker2_3_24/pgui_misc_servlet.html -->
 <!--
@@ -34,17 +43,17 @@
 -->
 
  
-  <servlet>   
+  <!--servlet>   
      <servlet-name>rest</servlet-name>   
      <jsp-file>/rest.jsp</jsp-file>   
   </servlet>
   <servlet-mapping>   
      <servlet-name>rest</servlet-name>   
      <url-pattern>/demo/*</url-pattern>   
-  </servlet-mapping>     
+  </servlet-mapping-->     
     
   <welcome-file-list>  
-     <welcome-file>rest.jsp</welcome-file>
+     <welcome-file>index.jsp</welcome-file>
   </welcome-file-list>   
   
 </web-app>

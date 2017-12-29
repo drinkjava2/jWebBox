@@ -40,25 +40,49 @@
         <version.source-plugin>2.4</version.source-plugin>
         <version.javadoc-plugin>2.10.3</version.javadoc-plugin>
         <version.gpg-plugin>1.6</version.gpg-plugin>
+        
+        <spring.version>4.3.13.RELEASE</spring.version>
  </properties> 
  
  
 
  <dependencies> 
- 
+         <!--Spring context-->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+        <!-- Spring MVC -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-webmvc</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+        
+        
+        
     <!-- Servlet API and JSTL are for compile only -->
    <!--dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>servlet-api</artifactId>
       <version>2.5</version>
       <scope>provided</scope>
-   </dependency>
-   <dependency>
+   </dependency-->
+   <!--dependency>
       <groupId>javax.servlet.jsp</groupId>
       <artifactId>jsp-api</artifactId>
       <version>2.1</version>
       <scope>provided</scope>
    </dependency-->  
+   
+   <dependency>
+    <groupId>javax.servlet.jsp</groupId>
+    <artifactId>javax.servlet.jsp-api</artifactId>
+    <version>2.3.1</version>
+    <scope>provided</scope>
+   </dependency>
+   
 
   <dependency>
     <groupId>javax.servlet</groupId>
