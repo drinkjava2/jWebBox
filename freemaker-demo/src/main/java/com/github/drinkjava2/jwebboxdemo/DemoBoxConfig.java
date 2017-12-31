@@ -10,48 +10,49 @@ import com.github.drinkjava2.jwebbox.WebBox;
 
 @SuppressWarnings("all")
 public class DemoBoxConfig {
-	// Demo1 - HomePage
-	public static class DemoHomePage extends WebBox {
+
+	// demo1 - The home page
+	public static class demo1 extends WebBox {
 		{
-			this.setPage("/WEB-INF/pages/homepage.jsp"); 
+			this.setPage("/WEB-INF/pages/homepage.jsp");
 			this.setAttribute("menu",
 					new WebBox("/WEB-INF/pages/menu.jsp").setAttribute("msg", "Demo1 - A basic layout"));
 			this.setAttribute("body", new LeftRightLayout());
-			this.setAttribute("footer",  new WebBox( "/WEB-INF/pages/footer.jsp"));
+			this.setAttribute("footer", new WebBox("/WEB-INF/pages/footer.jsp"));
 		}
 	}
-	
-	// Left right layout
+
+	// A left-right layout
 	public static class LeftRightLayout extends WebBox {
 		{
-			this.setPage("/WEB-INF/pages/left_right.jsp");
+			this.setPage("/WEB-INF/pages/left_right_layout.jsp");
 			ArrayList<WebBox> boxlist = new ArrayList<WebBox>();
 			boxlist.add(new WebBox().setPage("/WEB-INF/pages/page1.jsp"));
 			boxlist.add(new WebBox().setPage("/WEB-INF/pages/page2.jsp"));
 			this.setAttribute("boxlist", boxlist);
 		}
-	}  
+	}
 
-	// Demo2 - Change body layout
-	public static class DemoTopDown extends DemoHomePage {
+	// demo2 - Change body layout
+	public static class demo2 extends demo1 {
 		{
 			((WebBox) this.getAttribute("menu")).setAttribute("msg", "Demo2 - Change body layout");
 			this.setAttribute("body", new TopDownLayout());
 		}
 	}
 
-	// Top down layout
+	// A top-down layout
 	public static class TopDownLayout extends LeftRightLayout {
 		{
-			this.setPage("/WEB-INF/pages/top_down.jsp");
+			this.setPage("/WEB-INF/pages/top_down_layout.jsp");
 		}
 	}
-	
-	// Demo3 - Prepare methods
-	public static class DemoPrepareData extends DemoHomePage {
+
+	// demo3 - Prepare methods
+	public static class demo3 extends demo1 {
 		{
 			setPrepareStaticMethod(DemoBoxConfig.class.getName() + ".changeMenu");
-			setAttribute("body", new WebBox().setText("<div style=\"width:900px\"> This is body </div>")
+			setAttribute("body", new WebBox().setText("<div style=\"width:900px\"> This is body text </div>")
 					.setPrepareURL("/WEB-INF/pages/prepare.jsp").setPrepareBean(new Printer()));
 			setAttribute("footer", new WebBox("/WEB-INF/pages/footer.jsp").setPrepareBean(new Printer())
 					.setPrepareBeanMethod("print"));
@@ -59,22 +60,23 @@ public class DemoBoxConfig {
 	}
 
 	public static void changeMenu(PageContext pageContext, WebBox callerBox) throws IOException {
-		((WebBox) callerBox.getAttribute("menu")).setAttribute("msg", "Demo3 - Prepare methods");
+		((WebBox) callerBox.getAttribute("menu")).setAttribute("msg",
+				"Demo3 - Prepare methods <br/>This is modified by \"changeMenu\" static method");
 	}
 
 	public static class Printer {
 		public void prepare(PageContext pageContext, WebBox callerBox) throws IOException {
-			pageContext.getOut().write("This is printed by Printer's default prepare method <br/>");
+			pageContext.getOut().write("This is printed by Printer's default \"prepare\" method <br/>");
 		}
 
 		public void print(PageContext pageContext, WebBox callerBox) throws IOException {
-			pageContext.getOut().write("This is printed by Printer's print method <br/>");
+			pageContext.getOut().write("This is printed by Printer's \"print\" method <br/>");
 			pageContext.getOut().write((String) pageContext.getRequest().getAttribute("urlPrepare"));
 		}
 	}
 
-	// Demo4 - List
-	public static class DemoList extends DemoHomePage {
+	// demo4 - List
+	public static class demo4 extends demo1 {
 		{
 			((WebBox) this.getAttribute("menu")).setAttribute("msg", "Demo4 - List");
 			ArrayList<Object> boxlist1 = new ArrayList<Object>();
@@ -84,7 +86,29 @@ public class DemoBoxConfig {
 		}
 	}
 
-	// Demo5 - Table & Pagination
+	// demo5 - Freemaker demo
+	public static class demo5 extends WebBox {
+		{
+			this.setPage("/WEB-INF/pages/homepage.ftl");
+			this.setAttribute("menu",
+					new WebBox("/WEB-INF/pages/menu.jsp").setAttribute("msg", "Demo5 - Freemaker demo"));
+			this.setAttribute("body", new LeftRightFtlLayout());
+			this.setAttribute("footer", new WebBox("/WEB-INF/pages/footer.ftl"));
+		}
+	}
+
+	// A left-right Freemaker layout
+	public static class LeftRightFtlLayout extends WebBox {
+		{
+			this.setPage("/WEB-INF/pages/left_right_layout.ftl");
+			ArrayList<WebBox> boxlist = new ArrayList<WebBox>();
+			boxlist.add(new WebBox().setPage("/WEB-INF/pages/page1.ftl"));
+			boxlist.add(new WebBox().setPage("/WEB-INF/pages/page2.jsp"));
+			this.setAttribute("boxlist", boxlist);
+		}
+	}
+
+	// demo6 - Table & Pagination
 	public static final List<String> tableDummyData = new ArrayList<String>();
 	public static final List<String> commentDummyData = new ArrayList<String>();
 	static {
@@ -104,7 +128,7 @@ public class DemoBoxConfig {
 			commentDummyData.add(0, comment);
 	}
 
-	public static class PrepareDemo5 {
+	public static class PrepareForDemo6 {
 		private int getPageNo(PageContext pageContext, String pageId) {
 			String pageNo = (String) pageContext.getRequest().getParameter(pageId + "_pageNo");
 			return pageNo == null ? 1 : Integer.valueOf(pageNo);
@@ -133,10 +157,10 @@ public class DemoBoxConfig {
 		}
 	}
 
-	public static class DemoTable extends DemoHomePage {
+	public static class demo6 extends demo1 {
 		{
 			setAttribute("menu",
-					((WebBox) this.getAttribute("menu")).setAttribute("msg", "Demo5 - Table & Pagination"));
+					((WebBox) this.getAttribute("menu")).setAttribute("msg", "Demo6 - Table & Pagination"));
 			List<WebBox> bodyList = new ArrayList<WebBox>();
 			bodyList.add(new TableBox());
 			bodyList.add(new TablePaginBarBox());
@@ -151,7 +175,7 @@ public class DemoBoxConfig {
 
 		class TableBox extends WebBox {
 			{
-				this.setPrepareBean(new PrepareDemo5()).setPrepareBeanMethod("prepareTable");
+				this.setPrepareBean(new PrepareForDemo6()).setPrepareBeanMethod("prepareTable");
 				setPage("/WEB-INF/pages/page_table.jsp");
 				setAttribute("pageId", "table");
 				setAttribute("targetList", tableDummyData);
@@ -162,7 +186,7 @@ public class DemoBoxConfig {
 
 		class TablePaginBarBox extends TableBox {
 			{
-				this.setPrepareBean(new PrepareDemo5()).setPrepareBeanMethod("preparePaginBar");
+				this.setPrepareBean(new PrepareForDemo6()).setPrepareBeanMethod("preparePaginBar");
 				setPage("/WEB-INF/pages/pagin_bar.jsp");
 			}
 		}
@@ -178,7 +202,7 @@ public class DemoBoxConfig {
 
 		class CommentPaginBarBox extends CommentBox {
 			{
-				this.setPrepareBean(new PrepareDemo5()).setPrepareBeanMethod("preparePaginBar");
+				this.setPrepareBean(new PrepareForDemo6()).setPrepareBeanMethod("preparePaginBar");
 				setPage("/WEB-INF/pages/pagin_bar.jsp");
 			}
 		}

@@ -16,7 +16,6 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
 
 import javax.servlet.jsp.PageContext;
 
@@ -30,25 +29,28 @@ import javax.servlet.jsp.PageContext;
  * @version 2.1
  */
 public class WebBox {
-	// A static method to prepare data, first be called if have
+	/** A static method to prepare data, first be called if have */
 	private String prepareStaticMethod;
 
-	// A Bean have a "prepare" methods to prepare data, 2nd called
+	/** A Bean have a "prepare" methods to prepare data, 2nd called */
 	private Object prepareBean;
 
-	// If prepareBeanMethod is set, use it instead of use bean's "prepare"
-	// method
+	/**
+	 * If prepareBeanMethod is set, use it instead of use bean's "prepare" method
+	 */
 	private String prepareBeanMethod;
 
-	private String prepareURL;// A URL, 3rd called, if have
+	/** A URL, 3rd called, if have */
+	private String prepareURL;
 
-	private String text; // A text , 4th output, if not empty
+	/** A text , 4th output, if not empty */
+	private String text;
 
-	private String page;// A JSP page, 5th output, if not empty
+	/** A JSP or FTL page, 5th output, if not empty */
+	private String page;
 
+	/** Inside use hashmap store attributes */
 	private Map<String, Object> attributeMap = new HashMap<String, Object>();
-
-	private WebBox parent; // parentBox
 
 	public WebBox() {
 		// default constructor
@@ -57,8 +59,7 @@ public class WebBox {
 	/**
 	 * Create a WebBox
 	 * 
-	 * @param page
-	 *            The JSP file location, an example: "/template/abc.jsp"
+	 * @param page The JSP or FTL or any URL, for example: "/template/abc.jsp"
 	 */
 	public WebBox(String page) {
 		this.setPage(page);
@@ -69,7 +70,7 @@ public class WebBox {
 		return (str == null || str.length() == 0);
 	}
 
-	/** Prepare data and show page */
+	/** Prepare data and out put text include page if have */
 	public void show(PageContext pageContext) {
 		prepareOnly(pageContext);
 		if (text != null && text.length() > 0)
@@ -81,7 +82,7 @@ public class WebBox {
 		showPageOrUrl(pageContext, this.page, this);
 	}
 
-	/** Prepare data only, call prepareStaticMethod and URL, do not show page */
+	/** Prepare data, only but do not output text and do not show page */
 	public void prepareOnly(PageContext pageContext) {
 		if (!isEmptyStr(prepareStaticMethod)) {
 			int index = prepareStaticMethod.lastIndexOf('.');
@@ -89,23 +90,20 @@ public class WebBox {
 			String methodName = prepareStaticMethod.substring(index + 1, prepareStaticMethod.length());
 			if (isEmptyStr(className) || isEmptyStr(methodName))
 				throw new WebBoxException("Error#001: Can not call method: " + prepareStaticMethod);
-			executePrepareStaticMethod(pageContext, className, methodName);
+			try {
+				Class<?> c = Class.forName(className);
+				Method m = c.getMethod(methodName, PageContext.class, WebBox.class);
+				m.invoke(c, pageContext, this); // Call a static method
+			} catch (Exception e) {
+				throw new WebBoxException(e);
+			}
 		}
 		if (prepareBean != null)
 			executeBeanMethod(pageContext);
 		showPageOrUrl(pageContext, this.prepareURL, this);
 	}
 
-	private void executePrepareStaticMethod(PageContext pageContext, String className, String methodName) {
-		try {
-			Class<?> c = Class.forName(className);
-			Method m = c.getMethod(methodName, PageContext.class, WebBox.class);
-			m.invoke(c, pageContext, this); // Call a static method
-		} catch (Exception e) {
-			throw new WebBoxException(e);
-		}
-	}
-
+	/** Execute Bean Method */
 	private void executeBeanMethod(PageContext pageContext) {
 		try {
 			Class<?> c = prepareBean.getClass();
@@ -126,34 +124,24 @@ public class WebBox {
 	private static void showPageOrUrl(PageContext pageContext, String pageOrUrl, WebBox caller) {
 		if (isEmptyStr(pageOrUrl))
 			return;
-		Random rand = new Random();
-		String boxCallerID = Long.toString(rand.nextLong()) + "_" + rand.nextLong() + "_" + rand.nextLong();
-		pageContext.getRequest().setAttribute(boxCallerID, caller);// put caller
+		WebBox oldCallerBox = (WebBox) pageContext.getRequest().getAttribute("jwebbox");
+		pageContext.getRequest().setAttribute("jwebbox", caller);
 		try {
 			pageContext.getOut().flush();
-		} catch (IOException e1) {
-			throw new WebBoxException(e1);
-		}
-		try {
-			pageContext.getRequest()
-					.getRequestDispatcher(
-							pageOrUrl + ((pageOrUrl).indexOf("?") >= 0 ? "&" : "?") + "boxCallerID=" + boxCallerID)
-					.include(pageContext.getRequest(), pageContext.getResponse());
+			pageContext.getRequest().getRequestDispatcher(pageOrUrl).include(pageContext.getRequest(),
+					pageContext.getResponse());
 		} catch (Exception e) {
 			throw new WebBoxException(e);
 		} finally {
-			pageContext.getRequest().removeAttribute(boxCallerID);
+			pageContext.getRequest().setAttribute("jwebbox", oldCallerBox);
 		}
 	}
 
 	/** Get current pageContext's WebBox instance */
 	public static WebBox getBox(PageContext pageContext) {
-		String boxCallerID = pageContext.getRequest().getParameter("boxCallerID");
-		if (isEmptyStr(boxCallerID))
-			throw new WebBoxException("Error#002: Can not find boxCallerID in parameters");
-		WebBox box = (WebBox) pageContext.getRequest().getAttribute(boxCallerID);
+		WebBox box = (WebBox) pageContext.getRequest().getAttribute("jwebbox");
 		if (box == null)
-			throw new WebBoxException("Error#003: Can not find caller box in pageContext");
+			throw new WebBoxException("Error#003: Can not find WebBox instance in pageContext");
 		return box;
 	}
 
@@ -178,11 +166,10 @@ public class WebBox {
 		if (obj instanceof WebBox)
 			((WebBox) obj).show(pageContext);
 		else if (obj instanceof ArrayList<?>) {
-			for (Object item : (ArrayList<?>) obj) {
+			for (Object item : (ArrayList<?>) obj)
 				showObject(pageContext, item);
-			}
 		} else if (obj instanceof String) {
-			String str = "" + obj;
+			String str = (String) obj;
 			if (str.startsWith("/")) {
 				showPageOrUrl(pageContext, str, getBox(pageContext));
 			} else {
@@ -192,7 +179,8 @@ public class WebBox {
 					throw new WebBoxException(e);
 				}
 			}
-		}
+		} else
+			throw new WebBoxException("Can not show unknow type object " + obj + " on page");
 	}
 
 	/** Set attribute for current WebBox instance */
@@ -207,6 +195,7 @@ public class WebBox {
 		return (T) attributeMap.get(key);
 	}
 
+	/** Get the prepare URL */
 	public String getPrepareURL() {
 		return prepareURL;
 	}
@@ -220,6 +209,7 @@ public class WebBox {
 		return this;
 	}
 
+	/** Get the page */
 	public String getPage() {
 		return page;
 	}
@@ -230,6 +220,7 @@ public class WebBox {
 		return this;
 	}
 
+	/** Get the Text */
 	public String getText() {
 		return text;
 	}
@@ -240,27 +231,18 @@ public class WebBox {
 		return this;
 	}
 
-	/** Get the parent WebBox instance */
-	public WebBox getParent() {
-		return parent;
-	}
-
-	/** set the parent WebBox */
-	public WebBox setParent(WebBox parent) {
-		this.parent = parent;
-		return this;
-	}
-
 	/** Set a prepare static method */
 	public WebBox setPrepareStaticMethod(String prepareStaticMethod) {
 		this.prepareStaticMethod = prepareStaticMethod;
 		return this;
 	}
 
+	/** Get the Prepare static method name */
 	public String getPrepareStaticMethod() {
 		return prepareStaticMethod;
 	}
 
+	/** Get the prepare bean instance */
 	public Object getPrepareBean() {
 		return prepareBean;
 	}
@@ -271,6 +253,7 @@ public class WebBox {
 		return this;
 	}
 
+	/** Get the prepare bean method name */
 	public String getPrepareBeanMethod() {
 		return prepareBeanMethod;
 	}
@@ -281,8 +264,18 @@ public class WebBox {
 		return this;
 	}
 
-	@SuppressWarnings("serial")
+	public Map<String, Object> getAttributeMap() {
+		return attributeMap;
+	}
+
+	public void setAttributeMap(Map<String, Object> attributeMap) {
+		this.attributeMap = attributeMap;
+	}
+
+	/** A runtime exception wrap for WebBox */
 	public static class WebBoxException extends RuntimeException {
+		private static final long serialVersionUID = 1L;
+
 		public WebBoxException(String msg) {
 			super(msg);
 		}

@@ -1,0 +1,1 @@
+This is Freemaker footer.ftl

@@ -1,7 +1,7 @@
 <html>
 <head><title>Acmee Products International</title>
 <body>
-  <@include_page path="/demo/3"/>
+  <@include_page path="/demo3.htm"/>
   <#-- 
   <h1>Hello ${user}!</h1>
   <p>These are our latest offers:

@@ -1,6 +1,6 @@
+<#assign box=JspTaglibs["https://github.com/drinkjava2/jwebbox/tld"] />
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
-<%@page import="com.github.drinkjava2.jwebbox.WebBox"%> 
 <head>
 <style type="text/css">
 #temp_content {width: 900px; margin: auto; background-color:#EEEEEE;} 
@@ -12,14 +12,14 @@
 	<body>
 		<div id="temp_content">
 			<div id="temp_menu">
-				<div align="center">
-				<% WebBox.showAttribute(pageContext, "menu");%>
+				<div align="center"> 
+ 				 <@box.show attribute="menu" />
 				</div>
-			</div>
-				<% WebBox.showAttribute(pageContext,"body");%>
-			<div id="temp_footer">
+			</div> 
+			 	  <@box.show attribute="body" />
+			 <div id="temp_footer">
 				<div align="center">
-				<% WebBox.showAttribute(pageContext,"footer");%>
+				  <@box.show attribute="footer" />
 				</div>
 			</div>	
 		</div>
