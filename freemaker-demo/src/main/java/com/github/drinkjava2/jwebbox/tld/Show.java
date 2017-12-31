@@ -3,7 +3,6 @@ package com.github.drinkjava2.jwebbox.tld;
 import java.io.IOException;
 
 import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.JspWriter;
 import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.tagext.SimpleTagSupport;
 
@@ -25,11 +24,20 @@ public class Show extends SimpleTagSupport {
 		this.attribute = attribute;
 	}
 
+	private Object target;
+
+	public Object getTarget() {
+		return target;
+	}
+
+	public void setTarget(Object target) {
+		this.target = target;
+	}
+
 	public void doTag() throws JspException, IOException {
-//		System.out.println("====================in Show doTag");
-//		System.out.println("attribute=" + attribute);
-//		System.out.println("getJspContext()=" + getJspContext());
-//		JspWriter out = getJspContext().getOut();
-		WebBox.showAttribute((PageContext) getJspContext(), getAttribute());
+		if (attribute != null && attribute.length() != 0)
+			WebBox.showAttribute((PageContext) getJspContext(), getAttribute());
+		if (target != null)
+			WebBox.showTarget((PageContext) getJspContext(), target);
 	}
 }

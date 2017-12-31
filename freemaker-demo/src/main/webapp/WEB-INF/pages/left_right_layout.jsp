@@ -3,13 +3,13 @@
 <%
 	ArrayList<WebBox> boxlist = WebBox.getAttribute(pageContext,"boxlist");
 %>
-<div id="temp_left" style="margin: 10px; width: 500px; float: left; background-color:#CCFFCC;">
+<div id="temp_left" style="margin: 10px; width: 430px; float: left; background-color:#CCFFCC;">
 	<%
 		boxlist.get(0).show(pageContext);
 	%>
 </div>
-<div id="temp_right"  style="margin: 10px; float: right; width: 350px;background-color:#FFFFCC;">
+<div id="temp_right"  style="margin: 10px; float: right; width: 430px;background-color:#FFFFCC;">
 	<%
-		boxlist.get(1).show(pageContext);
+	  WebBox.showTarget(pageContext, boxlist.get(1)); 
 	%>
 </div>

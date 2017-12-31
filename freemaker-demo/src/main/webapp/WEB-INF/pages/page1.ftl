@@ -1,1 +1,1 @@
-<br/>This is page1.ftl<br/>
+This is page1.ftl<br/>

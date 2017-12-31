@@ -29,6 +29,8 @@ import javax.servlet.jsp.PageContext;
  * @version 2.1
  */
 public class WebBox {
+	private String id = "IDDDD";
+
 	/** A static method to prepare data, first be called if have */
 	private String prepareStaticMethod;
 
@@ -153,23 +155,23 @@ public class WebBox {
 	/** Assume the value is String or WebBox instance, show it */
 	public static void showAttribute(PageContext pageContext, String attributeName) {
 		Object obj = WebBox.getAttribute(pageContext, attributeName);
-		showObject(pageContext, obj);
+		showTarget(pageContext, obj);
 	}
 
 	/**
-	 * Show an unknown object, object can be one of below: WebBox instance,
-	 * String,List of WebBox instance, List of String
+	 * Show an target object, target can be: WebBox instance or String or List of
+	 * WebBox instance or String
 	 */
-	public static void showObject(PageContext pageContext, Object obj) {
-		if (obj == null)
+	public static void showTarget(PageContext pageContext, Object target) {
+		if (target == null)
 			return;
-		if (obj instanceof WebBox)
-			((WebBox) obj).show(pageContext);
-		else if (obj instanceof ArrayList<?>) {
-			for (Object item : (ArrayList<?>) obj)
-				showObject(pageContext, item);
-		} else if (obj instanceof String) {
-			String str = (String) obj;
+		if (target instanceof WebBox)
+			((WebBox) target).show(pageContext);
+		else if (target instanceof ArrayList<?>) {
+			for (Object item : (ArrayList<?>) target)
+				showTarget(pageContext, item);
+		} else if (target instanceof String) {
+			String str = (String) target;
 			if (str.startsWith("/")) {
 				showPageOrUrl(pageContext, str, getBox(pageContext));
 			} else {
@@ -180,8 +182,10 @@ public class WebBox {
 				}
 			}
 		} else
-			throw new WebBoxException("Can not show unknow type object " + obj + " on page");
+			throw new WebBoxException("Can not show unknow type object " + target + " on page");
 	}
+
+	// Getter & Setters
 
 	/** Set attribute for current WebBox instance */
 	public WebBox setAttribute(String key, Object value) {
@@ -270,6 +274,14 @@ public class WebBox {
 
 	public void setAttributeMap(Map<String, Object> attributeMap) {
 		this.attributeMap = attributeMap;
+	}
+
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
 	}
 
 	/** A runtime exception wrap for WebBox */

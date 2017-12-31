@@ -1,1 +1,1 @@
-<%@page import="com.github.drinkjava2.jwebbox.WebBox"%><p>This is comment <%=""+WebBox.getAttribute(pageContext, "item")%>.</p>
+<%@page import="com.github.drinkjava2.jwebbox.WebBox"%>This is comment <%=""+WebBox.getAttribute(pageContext, "item")%>

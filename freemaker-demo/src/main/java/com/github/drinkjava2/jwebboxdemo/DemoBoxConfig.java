@@ -92,18 +92,19 @@ public class DemoBoxConfig {
 			this.setPage("/WEB-INF/pages/homepage.ftl");
 			this.setAttribute("menu",
 					new WebBox("/WEB-INF/pages/menu.jsp").setAttribute("msg", "Demo5 - Freemaker demo"));
-			this.setAttribute("body", new LeftRightFtlLayout());
+			this.setAttribute("body", new FreemakerLayout());
 			this.setAttribute("footer", new WebBox("/WEB-INF/pages/footer.ftl"));
 		}
 	}
 
 	// A left-right Freemaker layout
-	public static class LeftRightFtlLayout extends WebBox {
+	public static class FreemakerLayout extends WebBox {
 		{
-			this.setPage("/WEB-INF/pages/left_right_layout.ftl");
-			ArrayList<WebBox> boxlist = new ArrayList<WebBox>();
-			boxlist.add(new WebBox().setPage("/WEB-INF/pages/page1.ftl"));
-			boxlist.add(new WebBox().setPage("/WEB-INF/pages/page2.jsp"));
+			this.setPage("/WEB-INF/pages/freemaker_layout.ftl");
+			ArrayList<Object> boxlist = new ArrayList<Object>();
+			boxlist.add("/WEB-INF/pages/page1.ftl");
+			boxlist.add(new WebBox("/WEB-INF/pages/page2.ftl"));
+			boxlist.add("/WEB-INF/pages/page3.jsp");
 			this.setAttribute("boxlist", boxlist);
 		}
 	}
