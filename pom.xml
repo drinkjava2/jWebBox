@@ -32,14 +32,8 @@ See the Apache License Version 2.0 for the specific language governing permissio
     <!-- jWebBox -->
     <module>jwebbox</module>
     
-	<!-- An example shows how to use jWebBox for JSP pages-->
-    <module>jsp-demo</module>
-
-	<!-- An example shows how to use jWebBox for Freemaker pages -->
-    <module>freemaker-demo</module>	 
-	
-	<!-- An example shows how to use jWebBox for JSP and Freemaker pages -->
-    <!--module>jsp-freemaker-demo</module-->	 
+	<!-- An example web project shows how to use jWebBox -->
+    <module>jwebbox-demo</module>   
   </modules>
 
   <properties> 
