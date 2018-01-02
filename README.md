@@ -2,7 +2,7 @@
 ### jWebBox
 **License:** [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0)  
  
-这是一个服务端(支持JSP和FreeMaker)页面布局工具，特点是简单，无XML，仅400行源码，实现了与Apache Tiles类似的页面布局功能。
+这是一个服务端(支持JSP和FreeMaker)页面布局工具，特点是简单，无XML，仅用400行源码实现了与Apache Tiles类似的页面布局功能。
 
 #### 目前一些服务端JSP页面布局工具的缺点：
 * Apache Tiles: 功能强大但过于臃肿，源码复杂，第三方库引用多，XML配置不方便，动态配置功能差。
@@ -10,13 +10,13 @@
 * JSP Layout或Stripes等JSP布局工具：功能不够强，在布局的继承或参数传递上有问题。
 
 #### JWebBox特点：
-1. 简单, 整个项目仅两个文件，400行源码，易于学习和维护。
+1. 简单, 整个项目仅400行源码，易于学习和维护。
 2. 与jBeanBox和jSqlBox项目类似，用纯JAVA类代替XML配置（实际上前两个项目是受此项目启发)，支持动态配置，配置可以在运行期动态生成和修改。
 3. 无侵入性，支持JSP和FreeMaker两种模板混用。可用于整个网站的服务端布局，也可用于编写页面局部零件。
 4. 支持静态方法、实例方法、URL引用三种数据准备方式。
 
 #### jWebBox2.1版本更新：
-添加FreeMaker模板支持;增加一个JSP标签;添加了表格、分页、表单处理的演示；更正WebLogic不能运行的bug. 
+添加FreeMaker模板支持;增加一个JSP标签;添加了表格、分页、表单处理的演示;更正WebLogic不能运行的bug. 
 
 #### 使用方法：
 在项目的pom.xml中添加如下内容：
@@ -98,7 +98,7 @@ left_right_layout.jsp是一个布局模板，内容如下(其它的JSP文件类�
 * setPage方法用于设定当前WebBox实例的目标页面(可选)，WebBox构造器允许带一个页面参数。 
 * setAttribute方法在WebBox的一个内部HashMap中暂存一个键值，值可以为任意Java对象类型，相应地取值用getAttribute方法，在JSP中可以用EL表达式${jwebbox.attributeMap.keyname}获取。
 * 在JSP页面中调用<box:show attribute="body" />标签来显示对应键值的页面，值只能是String、WebBox实例或它们的List。
-* show标签的另一个用法是<box:show target="xxx"/> target只能是String、WebBox或List。如下5种写法在JSP中是等同的:
+* show标签的另一个用法是<box:show target="xxx"/>, target只能是String、WebBox或List。如下5种写法在JSP中是等同的:
 ```
    <box:show attribute="menu" />                                                         
    <box:show target="${jwebbox.attributeMap.menu}" />   
@@ -184,7 +184,7 @@ demo2继承于demo1类，将"body"属性改成了一个上下布局top_down_layo
     }
   }
 ```
-相比与普通的Include指令，Apache Tiles和jWebBox这类布局工具的优势之一在于可以在各个子页面加载之前进行数据准备工作。jWebBox有三种数据准备方式:  
+相比与普通的Include指令，Apache Tiles和jWebBox这类布局工具的优势之一在于可以在各个子页面加载之前进行数据准备工作，从而达到模块式开发的目的。jWebBox有三种数据准备方式:  
 * setPrepareStaticMethod方法指定一个静态方法用于数据准备。
 * setPrepareBean方法指定一个对象实例用于数据准备，用setPrepareBeanMethod来指定对象的方法名，如果不指定方法名，将缺省使用"prepare"作为方法名。
 * setPrepareURL方法将调用一个URL来作为数据谁备，这是一个服务端的URL引用，可以访问/WEB-INF目录下的内容。
