@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<taglib xmlns="http://java.sun.com/xml/ns/j2ee"  
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"  
+  xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-jsptaglibrary_2_0.xsd"  
+  version="2.0">
+  <tlib-version>1.0</tlib-version> 
+  <short-name>show</short-name>
+  <uri>http://github.com/drinkjava2/jwebbox</uri>
+  <tag>
+    <name>show</name>
+    <tag-class>com.github.drinkjava2.jwebbox.WebBox$Show</tag-class>
+    <body-content>empty</body-content>
+    <attribute>
+       <name>attribute</name>
+       <required>false</required>  
+       <rtexprvalue>true</rtexprvalue>
+       <type>java.lang.String</type>        
+    </attribute> 
+    <attribute>
+       <name>target</name>
+       <required>false</required>
+       <rtexprvalue>true</rtexprvalue>
+       <type>java.lang.Object</type>
+    </attribute>
+  </tag>
+</taglib>
+
+
+
+ 

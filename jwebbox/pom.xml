@@ -3,12 +3,18 @@
  <modelVersion>4.0.0</modelVersion>
  <groupId>com.github.drinkjava2</groupId>
  <artifactId>jwebbox</artifactId>
- <packaging>war</packaging>
+ <packaging>jar</packaging>
  <version>2.1</version>
  
  <name>jWebBox</name>
- <description>jWebBox is a JSP layout tool</description> 
+ <description>jWebBox is a JSP and FreeMaker layout tool</description> 
+ <url>https://github.com/drinkjava2/jWebBox</url>
    
+ <issueManagement>
+    <system>Github Issue</system>
+    <url>https://github.com/drinkjava2/jWebBox/issues</url>
+ </issueManagement>
+
  <licenses>
    <license>
      <name>The Apache Software License, Version 2.0</name>
@@ -22,7 +28,13 @@
      <email>yong9981@gmail.com</email>
      <url>https://github.com/drinkjava2/</url>
    </developer>
- </developers> 
+ </developers>
+
+ <scm>
+   <connection>scm:git@github.com:drinkjava2/jWebBox.git</connection>
+   <developerConnection>scm:git@github.com:drinkjava2/jWebBox.git</developerConnection>
+   <url>git@github.com:drinkjava2/jWebBox.git</url>
+ </scm>
 
  <properties>
       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding> 
@@ -42,21 +54,21 @@
         <version.gpg-plugin>1.6</version.gpg-plugin>
  </properties>  
 
- <dependencies> 
- 
-    <!-- For compile only -->
-    <dependency>
-       <groupId>javax.servlet</groupId>
-       <artifactId>servlet-api</artifactId>
-       <version>2.5</version>
-       <scope>provided</scope>
-    </dependency>
-    <dependency>
-       <groupId>javax.servlet.jsp</groupId>
-       <artifactId>jsp-api</artifactId>
-       <version>2.1</version>
-       <scope>provided</scope>
-    </dependency>  
+ <dependencies>  
+   <!-- Servlet API and JSTL are for compile only -->
+  <dependency>
+    <groupId>javax.servlet</groupId>
+    <artifactId>javax.servlet-api</artifactId>
+    <version>3.0.1</version>
+    <scope>provided</scope>
+  </dependency>
+  
+   <dependency>
+    <groupId>javax.servlet.jsp</groupId>
+    <artifactId>javax.servlet.jsp-api</artifactId>
+    <version>2.3.1</version>
+    <scope>provided</scope>
+   </dependency> 
    
  </dependencies> 
 
@@ -70,7 +82,7 @@
                     <source>${version.java}</source>
                     <target>${version.java}</target>
                     <encoding>UTF-8</encoding>
-                </configuration>
+               </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

@@ -21,14 +21,28 @@ Add below lines in project's pom.xml：
     <groupId>com.github.drinkjava2</groupId>
     <artifactId>jwebbox</artifactId>  
     <version>2.1</version>  
+  </dependency> 
+  
+  <dependency>
+    <groupId>javax.servlet</groupId>
+    <artifactId>javax.servlet-api</artifactId>
+    <version>3.0.1</version> <!-- or other version -->
+    <scope>provided</scope>
   </dependency>
+  
+   <dependency>
+    <groupId>javax.servlet.jsp</groupId>
+    <artifactId>javax.servlet.jsp-api</artifactId>
+    <version>2.3.1</version> <!-- or other version -->
+    <scope>provided</scope>
+   </dependency>   
 ```
-jWebBox has no 3rd party dependencies except javax.servlet-api and javax.jsp-api, which are provided by servlet container.
+jWebBox run on Java6+, depends on javax.servlet-api and javax.jsp-api which are provided by servlet container.
 
 #### Introduction
-There is a demo project shows how to use jWebBox, the demo project located in jwebbox-demo folder, and there is a "demo.war" file can be run on Tomcat or WebLogic.
+There is a demo project shows how to use jWebBox, the demo project located in jwebbox-demo folder, and there is a "jwebbox-demo.war" file can be run on Tomcat or WebLogic.
 
-#### Demo 1 - Basic layout
+#### Demo 1 - A basic example 
 ``` 
   public static class demo1 extends WebBox {
     {   this.setPage("/WEB-INF/pages/homepage.jsp");
@@ -78,7 +92,7 @@ left_right_layout.jsp：
 Explain:  
 * Method "setPage" set a target page, 1 WebBox can only set 1 target page, WebBox's constructor allow a page as constructor parameter.
 * Method "setAttribute" set a value in WebBox, to get the value, use getAttribute method.
-* In JSP page, use <box:show attribute="body" /> to show JSP page or WebBox, below lines are same: 
+* In JSP page, use <box:show attribute="body" /> to show JSP page or WebBox, below 5 usuages have same effect: 
 ```
    <box:show attribute="menu" />                                                         
    <box:show target="${jwebbox.attributeMap.menu}" />   
@@ -86,10 +100,8 @@ Explain:
    <% WebBox.showTarget(pageContext, WebBox.getAttribute(pageContext,"menu"));%>           
    <% ((WebBox)WebBox.getAttribute(pageContext,"menu")).show(pageContext);%>  //
 ```
-
-Demo 1 output：
+Screenshots of demo 1:
 ![image](demo1.png)
-
 
 #### Demo 2 - Extending of layout
 ```
@@ -184,8 +196,8 @@ Screenshots of demo 4：
     }
   }
 ```
-FreeMaker use TagLib format: <#assign box=JspTaglibs["http://github.com/drinkjava2/jwebbox"] /> and <@box.show attribute="menu" />  
-To use FreeMaker,need add below lines in web.xml：
+FreeMaker has different grammar compare to JSP, use <#assign box=JspTaglibs["http://github.com/drinkjava2/jwebbox"] /> and <@box.show attribute="menu" /> to use TagLib.
+And dd below lines in web.xml：
 ```
   <servlet>
     <servlet-name>freemarker</servlet-name>
@@ -207,8 +219,7 @@ And in pom.xml:
      <groupId>org.freemarker</groupId>
      <artifactId>freemarker</artifactId>
      <version>2.3.23</version> <!--or newer version-->
-  </dependency>
-   
+  </dependency>   
 ```
 Screenshots of demo 5： 
 ![image](demo5.png)

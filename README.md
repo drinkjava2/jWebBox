@@ -1,8 +1,8 @@
-(English instruction please see [README-English.md](README-English.md))  
+(English version see [README-English.md](README-English.md))  
 ### jWebBox
 **License:** [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0)  
  
-这是一个服务端(支持JSP和FreeMaker)页面布局工具，特点是简单，无XML，仅有400行源码，实现了与Apache Tiles类似的页面布局功能。
+这是一个服务端(支持JSP和FreeMaker)页面布局工具，特点是简单，无XML，仅有350行源码，实现了与Apache Tiles类似的页面布局功能。
 
 #### 目前一些服务端JSP页面布局工具的缺点：
 * Apache Tiles: 功能强大但过于臃肿，源码复杂，第三方库引用多，XML配置不方便，动态配置功能差。
@@ -10,33 +10,44 @@
 * JSP Layout或Stripes等JSP布局工具：功能不够强，在布局的继承或参数传递上有问题。
 
 #### JWebBox特点：
-1. 简单, 整个项目仅由2个文件、400行源码组成，无第三方依赖，易于学习和维护。
+1. 简单, 整个项目只有一个WebBox.java文件, 350行源码，易于学习和维护。
 2. 与jBeanBox和jSqlBox项目类似，用纯JAVA类代替XML配置（实际上前两个项目是受此项目启发)，支持动态配置，配置可以在运行期动态生成和修改。
-3. 无侵入性，可以和其它页面布局工具如Tiles或Sitemesh混用，支持JSP和FreeMaker混用。可用于整个网站的服务端布局，也可用于编写页面局部零件。
+3. 无侵入性，支持JSP和FreeMaker两种模板混用。可用于整个网站的服务端布局，也可用于编写页面局部零件。
 4. 支持静态方法、实例方法、URL引用三种数据准备方式。
 
 #### jWebBox2.1版本更新：
-更正了在WebLogic上运行的Bug;添加FreeMaker模板支持;增加一个JSP标签;添加了表格、分页、表单处理的演示； 
+添加FreeMaker模板支持;增加一个JSP标签;添加了表格、分页、表单处理的演示；更正WebLogic不能运行的bug. 
 
 #### 使用方法：
-* 方式1：将WebBox.java源文件拷到项目的源码中，将TagLib标签描述文件jwebbox.tld拷到项目的/WEB-INF/目录下。
-* 方式2：在项目的pom.xml中添加如下内容即可：
+在项目的pom.xml中添加如下内容：
 ```
   <dependency>  
     <groupId>com.github.drinkjava2</groupId>
     <artifactId>jwebbox</artifactId>  
     <version>2.1</version>  
+  </dependency> 
+  
+  <dependency>
+    <groupId>javax.servlet</groupId>
+    <artifactId>javax.servlet-api</artifactId>
+    <version>3.0.1</version> <!-- 或其它版本 -->
+    <scope>provided</scope>
   </dependency>
+  
+   <dependency>
+    <groupId>javax.servlet.jsp</groupId>
+    <artifactId>javax.servlet.jsp-api</artifactId>
+    <version>2.3.1</version> <!-- 或其它版本  -->
+    <scope>provided</scope>
+   </dependency>   
 ```
-jWebBox运行于Java6或以上，除了javax.servlet-api和javax.servlet.jsp-api这两个运行期库外(由Servlet容器提供)，没有其它第三方库依赖。  
+jWebBox运行于Java6或以上，依赖于javax.servlet-api和javax.servlet.jsp-api这两个运行期库(通常由Servlet容器提供)。  
 
 #### 详细介绍
-以下通过对示例的解释来详细说明jWebBox的使用，示例项目源码位于项目的jwebbox-demo目录下，在项目的根目录，也有一个打包好的(含源码)demo.war文件，可直接扔到Tomcat或webLogic里运行。
+以下通过对示例的解释来详细说明jWebBox的使用，示例项目源码位于项目的jwebbox-demo目录下，在项目的根目录，也有一个打包好的jwebbox-demo.war文件，可直接扔到Tomcat或WebLogic里运行。
 
-#### 示例1 - 基本布局  
-示例1, 一个带菜单和底脚的左右布局：
-![image](demo1.png)
-服务端代码如下
+#### 示例1 - 一个带菜单和底脚的左右布局   
+服务端代码如下:
 ``` 
   public static class demo1 extends WebBox {
     {   this.setPage("/WEB-INF/pages/homepage.jsp");
@@ -99,7 +110,7 @@ left_right_layout.jsp是一个布局模板，内容如下(其它的JSP文件类�
 * show标签使用时必须在JSP页面加入TagLib库的引用：<%@ taglib prefix="box" uri="http://github.com/drinkjava2/jwebbox"%> 
 * 每个WebBox实例，可以设定一个可选的name属性，每个页面用只能获取属于自已的一个WebBox实例，但是可以用getFatherWebBox方法获取当前WebBox实例的调用者所在页面的WebBox实例(有点绕口)。
 * 在JSP和Servlet中,jWebBox支持在页面中动态生成WebBox实例并调用show方法显示，例如:<% new WebBox("/somepage.jsp").setPrepareStaticMethod("xxx").show(pageContext); %>
-* 本示例项目中运用了一个小技巧，利用一个Servlet将所有".htm"后缀的访问转化对WebBox的访问，在web.xml中配置如下
+* 本示例项目中运用了一个小技巧，利用一个Servlet将所有".htm"后缀的访问转化对WebBox的创建和显示，在web.xml中配置如下
 ```
   <servlet>
     <servlet-name>htm2box</servlet-name>
@@ -111,14 +122,19 @@ left_right_layout.jsp是一个布局模板，内容如下(其它的JSP文件类�
     <url-pattern>*.htm</url-pattern>
   </servlet-mapping>
 ```
-htm2box.jsp是一个简洁的用于转发的Servlet，作用类似于Spring MVC中的DispatcherServlet, 所有.htm的访问经由这个Servlet处理成对WebBox实例的创建和显示。
+其中htm2box.jsp当作Servlet来使用，作用类似于Spring MVC中的DispatcherServlet:
 ```
-<%@page import="com.github.drinkjava2.jwebbox.WebBox"%><%
- String uri = substringBetween(request.getRequestURI(), "/", ".htm");
- WebBox box = (WebBox)Class.forName("com.github.drinkjava2.jwebboxdemo.DemoBoxConfig$" + uri).newInstance();
- box.show(pageContext);
+<%@page import="org.apache.commons.lang.StringUtils"%><%@page import="com.github.drinkjava2.jwebbox.WebBox"%><%
+  String uri=StringUtils.substringBefore(request.getRequestURI(),".");
+  uri = StringUtils.substringAfterLast(uri, "/");
+  if (uri == null || uri.length() == 0)
+    uri = "demo1";
+  WebBox box = (WebBox) Class.forName("com.github.drinkjava2.jwebboxdemo.DemoBoxConfig$" + uri).newInstance();
+  box.show(pageContext);
 %>
 ```
+示例1的输出:
+![image](demo1.png)
 
 #### 示例2 - 布局的继承
 服务端代码：
@@ -305,4 +321,4 @@ FreeMaker不支持直接在页面嵌入Java代码，语法也与JSP不同，引�
 ![image](demo6.png)
 
 
-以上即为jWebBox的全部说明文档，如有不清楚处，可以查看示例项目源码。
+以上即为jWebBox的全部说明文档，如有不清楚处，可以查看项目源码，毕竟这是一个只有350行源码的小工具。
