@@ -69,19 +69,19 @@ jWebBox运行于Java6或以上，依赖于javax.servlet-api和javax.servlet.jsp-
 ```
 其中homepage.jsp是主模板文件，主要内容如下：
 ```
-<#assign box=JspTaglibs["http://github.com/drinkjava2/jwebbox"] />
+<%@ taglib prefix="box" uri="http://github.com/drinkjava2/jwebbox"%> 
 <html>
-	<body>
-		<div id="temp_content">
-			<div id="temp_menu">
- 				  <@box.show attribute="menu" />
-			</div> 
-			 	  <@box.show attribute="body" />
-			 <div id="temp_footer">
-				  <@box.show attribute="footer" />
-			</div>	
-		</div>
-	</body>
+  <body>
+    <div id="temp_content">
+      <div id="temp_menu"> 
+            <box:show attribute="menu" /> 
+      </div>
+             <box:show attribute="body" /> 
+       <div id="temp_footer"> 
+           <box:show attribute="footer" />  
+      </div>  
+    </div>
+  </body>
 </html>
 ```
 left_right_layout.jsp是一个布局模板，内容如下(其它的JSP文件类似，此处略，详见示例)：
