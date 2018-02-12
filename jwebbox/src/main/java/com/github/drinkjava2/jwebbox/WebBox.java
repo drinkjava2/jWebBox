@@ -51,14 +51,19 @@ public class WebBox {
 	/** A text , 4th output, if not empty */
 	private String text;
 
-	/** A JSP or FTL page, 5th output, if not empty */
-	private String page;
+	/**
+	 * A JSP or FTL page String, or a WebBox instance, or a WebBox class, 5th
+	 * output, if not empty
+	 */
+	private Object page;
 
 	/** Inside use hashmap store attributes */
 	private Map<String, Object> attributeMap = new HashMap<String, Object>();
 
 	/** Point to father WebBox instance if have */
 	private WebBox fatherWebBox;
+
+	private PageContext pageContext;
 
 	public WebBox() {
 		// default constructor
@@ -67,7 +72,8 @@ public class WebBox {
 	/**
 	 * Create a WebBox
 	 * 
-	 * @param page The JSP or FTL or any URL, for example: "/template/abc.jsp"
+	 * @param page
+	 *            The JSP or FTL or any URL, for example: "/template/abc.jsp"
 	 */
 	public WebBox(String page) {
 		this.setPage(page);
@@ -78,16 +84,56 @@ public class WebBox {
 		return (str == null || str.length() == 0);
 	}
 
+	/** For subclasses override this method to do something */
+	public void beforeShow() {// NOSONAR
+	}
+
+	/** For subclasses override this method to do something */
+	public void beforeExecute() {// NOSONAR
+	}
+
+	/** For subclasses override this method to do something */
+	public void execute() {// NOSONAR
+	}
+
+	/** For subclasses override this method to do something */
+	public void afterExecute() {// NOSONAR
+	}
+
+	/** For subclasses override this method to do something */
+	public void afterPrepared() {// NOSONAR
+	}
+
+	/** For subclasses override this method to do something */
+	public void afterShow() {// NOSONAR
+	}
+
 	/** Prepare data and out put text include page if have */
 	public void show(PageContext pageContext) {
-		prepareOnly(pageContext);
+		try {
+			this.pageContext = pageContext;
+			beforeShow();
+			beforeExecute();
+			execute();
+			afterExecute();
+			prepareOnly(pageContext);
+			afterPrepared();
+			showText(pageContext);
+			showPageOrUrl(pageContext, this.page, this);
+			afterShow();
+		} finally {
+			this.pageContext = null;
+		}
+	}
+
+	/** Direct out put the text into pageContext.out */
+	private void showText(PageContext pageContext) {
 		if (text != null && text.length() > 0)
 			try {
 				pageContext.getOut().write(text);
 			} catch (IOException e) {
 				throw new WebBoxException(e);
 			}
-		showPageOrUrl(pageContext, this.page, this);
 	}
 
 	/** Prepare data, only but do not output text and do not show page */
@@ -129,7 +175,16 @@ public class WebBox {
 	}
 
 	/** Private method, use RequestDispatcher to show a URL or JSP page */
-	private static void showPageOrUrl(PageContext pageContext, String pageOrUrl, WebBox currentBox) {
+	private static void showPageOrUrl(PageContext pageContext, Object page, WebBox currentBox) {
+		if (page == null)
+			return;
+		if (page instanceof WebBox) {
+			((WebBox) page).show(pageContext);
+			return;
+		}
+		if (!(page instanceof String))
+			throw new WebBoxException("" + page + " is not a String or WebBox.");
+		String pageOrUrl = (String) page;
 		if (isEmptyStr(pageOrUrl))
 			return;
 		WebBox fatherWebBox = (WebBox) pageContext.getRequest().getAttribute(JWEBBOX_ID);
@@ -158,7 +213,8 @@ public class WebBox {
 
 	/** Get an attribute from current page's WebBox instance */
 	public static <T> T getAttribute(PageContext pageContext, String attributeName) {
-		return getBox(pageContext).getAttribute(attributeName);
+		T obj = getBox(pageContext).getAttribute(attributeName);
+		return obj;
 	}
 
 	/** Assume the value is String or WebBox instance, show it */
@@ -179,6 +235,14 @@ public class WebBox {
 		else if (target instanceof ArrayList<?>) {
 			for (Object item : (ArrayList<?>) target)
 				showTarget(pageContext, item);
+		} else if (target instanceof Class) {
+			WebBox bx = null;
+			try {
+				bx = (WebBox) ((Class<?>) target).newInstance();
+			} catch (Exception e) {
+				throw new WebBoxException("Can not create WebBox instance for target class '" + target + "'", e);
+			}
+			bx.show(pageContext);
 		} else if (target instanceof String) {
 			String str = (String) target;
 			if (str.startsWith("/")) {
@@ -202,10 +266,54 @@ public class WebBox {
 		return this;
 	}
 
-	/** Get attribute from current WebBox instance */
+	/** Get WebBox's attribute */
 	@SuppressWarnings("unchecked")
 	public <T> T getAttribute(String key) {
-		return (T) attributeMap.get(key);
+		Object obj = attributeMap.get(key);
+		if (obj == null && pageContext != null) {
+			obj = pageContext.getRequest().getAttribute(key);
+			if (obj == null)
+				obj = pageContext.getRequest().getParameter(key);
+			if (obj == null)
+				obj = pageContext.getAttribute(key);
+			if (obj == null)
+				obj = pageContext.getSession().getAttribute(key);
+		}
+		return (T) obj;
+	}
+
+	/**
+	 * Search and return an attribute object follow this order:
+	 * pageContext->request->parameter->session
+	 */
+	@SuppressWarnings("unchecked")
+	public <T> T getObject(String key) {
+		if (pageContext == null || key == null)
+			return null;
+		Object obj = pageContext.getAttribute(key);
+		if (obj == null)
+			obj = pageContext.getRequest().getAttribute(key);
+		if (obj == null)
+			obj = pageContext.getRequest().getParameter(key);
+		if (obj == null)
+			obj = pageContext.getSession().getAttribute(key);
+
+		return (T) obj;
+	}
+
+	/** Set a pageContext attribute */
+	public void setPageContextAttribute(String key, Object value) {
+		pageContext.setAttribute(key, value);
+	}
+
+	/** Set a request attribute */
+	public void setRequestAttribute(String key, Object value) {
+		pageContext.getRequest().setAttribute(key, value);
+	}
+
+	/** Set a session attribute */
+	public void setSessionAttribute(String key, Object value) {
+		pageContext.getSession().setAttribute(key, value);
 	}
 
 	/** Get the prepare URL */
@@ -223,12 +331,14 @@ public class WebBox {
 	}
 
 	/** Get the page */
-	public String getPage() {
+	public Object getPage() {
 		return page;
 	}
 
 	/** Set a JSP page or URL */
-	public WebBox setPage(String page) {
+	public WebBox setPage(Object page) {
+		if (!(page == null || page instanceof String || page instanceof WebBox))
+			throw new WebBoxException("setPage method only accept String or WebBox instance type parameter");
 		this.page = page;
 		return this;
 	}
@@ -309,6 +419,20 @@ public class WebBox {
 		this.fatherWebBox = fatherWebBox;
 	}
 
+	/**
+	 * Get current pageContext if have
+	 */
+	public PageContext getPageContext() {
+		return pageContext;
+	}
+
+	/**
+	 * Set pageContext to it
+	 */
+	public void setPageContext(PageContext pageContext) {
+		this.pageContext = pageContext;
+	}
+
 	/** A runtime exception caused by WebBox */
 	public static class WebBoxException extends RuntimeException {
 		private static final long serialVersionUID = 1L;
@@ -319,6 +443,10 @@ public class WebBox {
 
 		public WebBoxException(Throwable e) {
 			super(e);
+		}
+
+		public WebBoxException(String msg, Throwable e) {
+			super(msg, e);
 		}
 	}
 

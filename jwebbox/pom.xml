@@ -4,7 +4,7 @@
  <groupId>com.github.drinkjava2</groupId>
  <artifactId>jwebbox</artifactId>
  <packaging>jar</packaging>
- <version>2.1</version>
+ <version>2.1.1</version>
  
  <name>jWebBox</name>
  <description>jWebBox is a JSP and FreeMaker layout tool</description> 
