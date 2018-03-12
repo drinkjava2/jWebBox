@@ -10,7 +10,7 @@
 * JSP Layout或Stripes等JSP布局工具：功能不够强，在布局的继承或参数传递上有问题。
 
 #### JWebBox特点：
-1. 简单, 整个项目仅400行源码，易于学习和维护。
+1. 简单, 整个项目仅500行源码，易于学习和维护。
 2. 与jBeanBox和jSqlBox项目类似，用纯JAVA类代替XML配置（实际上前两个项目是受此项目启发)，支持动态配置，配置可以在运行期动态生成和修改。
 3. 无侵入性，支持JSP和FreeMaker两种模板混用。可用于整个网站的服务端布局，也可用于编写页面局部零件。
 4. 支持静态方法、实例方法、URL引用三种数据准备方式。
@@ -24,7 +24,7 @@
   <dependency>  
     <groupId>com.github.drinkjava2</groupId>
     <artifactId>jwebbox</artifactId>  
-    <version>2.1</version>  
+    <version>2.1.1</version>  
   </dependency> 
   
   <dependency>
