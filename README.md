@@ -2,7 +2,7 @@
 ### jWebBox
 **License:** [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0)  
  
-这是一个服务端(支持JSP和FreeMaker)页面布局工具，特点是简单，无XML，仅用400行源码实现了与Apache Tiles类似的页面布局功能。
+这是一个服务端(支持JSP和FreeMaker)页面布局工具，特点是简单，无XML，仅用500行源码实现了与Apache Tiles类似的页面布局功能。
 
 #### 目前一些服务端JSP页面布局工具的缺点：
 * Apache Tiles: 功能强大但过于臃肿，源码复杂，第三方库引用多，XML配置不方便，动态配置功能差。
@@ -14,17 +14,15 @@
 2. 与jBeanBox和jSqlBox项目类似，用纯JAVA类代替XML配置（实际上前两个项目是受此项目启发)，支持动态配置，配置可以在运行期动态生成和修改。
 3. 无侵入性，支持JSP和FreeMaker两种模板混用。可用于整个网站的服务端布局，也可用于编写页面局部零件。
 4. 支持静态方法、实例方法、URL引用三种数据准备方式。
-
-#### jWebBox2.1版本更新：
-添加FreeMaker模板支持;增加一个JSP标签;添加了表格、分页、表单处理的演示;更正WebLogic不能运行的bug. 
-
+5. 可利用它搭建小巧的MVC架构，向复杂的Spring-MVC告别，详见[jBooox](https://gitee.com/drinkjava2/jBooox)项目。
+  
 #### 使用方法：
 在项目的pom.xml中添加如下内容：
 ```
   <dependency>  
     <groupId>com.github.drinkjava2</groupId>
     <artifactId>jwebbox</artifactId>  
-    <version>2.1.1</version>  
+    <version>2.1.2</version>  
   </dependency> 
   
   <dependency>
@@ -322,3 +320,9 @@ FreeMaker不支持直接在页面嵌入Java代码，语法也与JSP不同，引�
 
 
 以上即为jWebBox的全部说明文档，如有不清楚处，可以查看项目源码或示例项目的源码。
+
+
+#### 附录-版本更新记录：
+jWebBox2.1 添加FreeMaker模板支持;增加一个JSP标签;添加了表格、分页、表单处理的演示;更正WebLogic不能运行的bug。  
+jWebBox2.1.1 添加了beforeShow、beforeexecute、execute、afterExecute、afterShow、afterPrepared几个空方法作为回调函数给子类用。示例详见jBooox项目。  
+jWebBox2.1.2 show()方法原来为void类型，现改为WebBox实例，便方便使用。  

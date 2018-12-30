@@ -20,7 +20,7 @@ Add below lines in project's pom.xml：
   <dependency>  
     <groupId>com.github.drinkjava2</groupId>
     <artifactId>jwebbox</artifactId>  
-    <version>2.1.1</version>  
+    <version>2.1.2</version>  
   </dependency> 
   
   <dependency>
