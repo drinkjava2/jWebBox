@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Yong Zhu.
+ * Copyright (C) 2016-2020 Yong Zhu.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -28,9 +28,10 @@ import javax.servlet.jsp.tagext.SimpleTagSupport;
  * few page components.
  * 
  * @author Yong Zhu(yong9981@gmail.com)
- * @version 2.1
+ * @version 2.1.2
  */
 public class WebBox {
+	//TODO: release WebBox maven v2.1.2, put jWebBox in pom.xml
 	public static final String JWEBBOX_ID = "jwebbox";
 
 	/** Optional, you can give a name to WebBox instance */
@@ -109,7 +110,7 @@ public class WebBox {
 	}
 
 	/** Prepare data and out put text include page if have */
-	public void show(PageContext pageContext) {
+	public WebBox show(PageContext pageContext) {
 		try {
 			this.pageContext = pageContext;
 			beforeShow();
@@ -124,16 +125,18 @@ public class WebBox {
 		} finally {
 			this.pageContext = null;
 		}
+		return this;
 	}
 
 	/** Direct out put the text into pageContext.out */
-	private void showText(PageContext pageContext) {
+	private WebBox showText(PageContext pageContext) {
 		if (text != null && text.length() > 0)
 			try {
 				pageContext.getOut().write(text);
 			} catch (IOException e) {
 				throw new WebBoxException(e);
 			}
+		return this;
 	}
 
 	/** Prepare data, only but do not output text and do not show page */
@@ -170,23 +173,23 @@ public class WebBox {
 	}
 
 	/** Show page only, do not call prepareStaticMethod and URL */
-	public void showPageOnly(PageContext pageContext) {
-		showPageOrUrl(pageContext, this.page, this);
+	public WebBox showPageOnly(PageContext pageContext) {
+		return showPageOrUrl(pageContext, this.page, this);
 	}
 
 	/** Private method, use RequestDispatcher to show a URL or JSP page */
-	private static void showPageOrUrl(PageContext pageContext, Object page, WebBox currentBox) {
+	private static WebBox showPageOrUrl(PageContext pageContext, Object page, WebBox currentBox) {
 		if (page == null)
-			return;
+			return currentBox;
 		if (page instanceof WebBox) {
 			((WebBox) page).show(pageContext);
-			return;
+			return currentBox;
 		}
 		if (!(page instanceof String))
 			throw new WebBoxException("" + page + " is not a String or WebBox.");
 		String pageOrUrl = (String) page;
 		if (isEmptyStr(pageOrUrl))
-			return;
+			return currentBox;
 		WebBox fatherWebBox = (WebBox) pageContext.getRequest().getAttribute(JWEBBOX_ID);
 		if (fatherWebBox != null)
 			currentBox.setFatherWebBox(fatherWebBox);
@@ -201,6 +204,7 @@ public class WebBox {
 			pageContext.getRequest().setAttribute(JWEBBOX_ID, fatherWebBox);
 			currentBox.setFatherWebBox(null);
 		}
+		return currentBox;
 	}
 
 	/** Get current pageContext's WebBox instance */
