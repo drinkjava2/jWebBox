@@ -1,9 +1,0 @@
-<%@page import="com.github.drinkjava2.jwebbox.WebBox"%>
-<a href="<%=request.getContextPath()%>/demo1.htm">Demo1</a>&nbsp;
-<a href="<%=request.getContextPath()%>/demo2.htm">Demo2</a>&nbsp;
-<a href="<%=request.getContextPath()%>/demo3.htm">Demo3</a>&nbsp;
-<a href="<%=request.getContextPath()%>/demo4.htm">Demo4</a>&nbsp;
-<a href="<%=request.getContextPath()%>/demo5.htm">Demo5</a>&nbsp;
-<a href="<%=request.getContextPath()%>/demo6.htm">Demo6</a>&nbsp;
-<br />
-<%	WebBox.showAttribute(pageContext,"msg");%>

@@ -1,0 +1,1 @@
+<%@page import="com.github.drinkjava2.jwebbox.JspBox"%>This is table item <%=""+JspBox.getAttribute(pageContext, "item")%>.

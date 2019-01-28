@@ -1,1 +1,0 @@
-<%@page import="com.github.drinkjava2.jwebbox.WebBox"%>This is comment <%=""+WebBox.getAttribute(pageContext, "item")%>
