@@ -8,7 +8,7 @@
 #temp_content #temp_menu {margin: 10px;background-color:#99CCCC;} 
 #temp_content #temp_footer {clear: both; margin: 10px;background-color:#9999CC;} 
 </style>
-<title>JWebBox2.1 Demo</title>  
+<title>JWebBox Demo</title>  
 </head> 
 	<body>
 		<div id="temp_content">

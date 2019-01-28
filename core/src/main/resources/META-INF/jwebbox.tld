@@ -8,7 +8,7 @@
   <uri>http://github.com/drinkjava2/jwebbox</uri>
   <tag>
     <name>show</name>
-    <tag-class>com.github.drinkjava2.jwebbox.WebBox$Show</tag-class>
+    <tag-class>com.github.drinkjava2.jwebbox.Show</tag-class>
     <body-content>empty</body-content>
     <attribute>
        <name>attribute</name>

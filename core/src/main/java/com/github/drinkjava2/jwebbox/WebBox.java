@@ -11,27 +11,23 @@
  */
 package com.github.drinkjava2.jwebbox;
 
-import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.PageContext;
-import javax.servlet.jsp.tagext.SimpleTagSupport;
 
 /**
- * JWebBox is a small layout tool used in java server pages(JSP) projects,
- * playing the same role like Apache Tiles and SiteMesh, no XML file, no Tags,
- * simple(only 1 java file), can be used to support whole site's layout or only
- * few page components.
+ * JWebBox is a small layout tool used for JSP or HTML layout, playing the same
+ * role like Apache Tiles and SiteMesh, no XML file, no Tags, simple, can be
+ * used to support whole site's server side layout or only few server side
+ * components.
  * 
  * @author Yong Zhu(yong9981@gmail.com)
- * @version 2.1.2
+ * @Since 1.0.0
  */
 public class WebBox {
-	//TODO: release WebBox maven v2.1.2, put jWebBox in pom.xml
 	public static final String JWEBBOX_ID = "jwebbox";
 
 	/** Optional, you can give a name to WebBox instance */
@@ -59,12 +55,12 @@ public class WebBox {
 	private Object page;
 
 	/** Inside use hashmap store attributes */
-	private Map<String, Object> attributeMap = new HashMap<String, Object>();
+	private Map<String, Object> attributeMap = new HashMap<>();
 
 	/** Point to father WebBox instance if have */
 	private WebBox fatherWebBox;
 
-	private PageContext pageContext;
+	private WebContext webContext;
 
 	public WebBox() {
 		// default constructor
@@ -110,37 +106,37 @@ public class WebBox {
 	}
 
 	/** Prepare data and out put text include page if have */
-	public WebBox show(PageContext pageContext) {
+	public WebBox show(WebContext webContext) {
 		try {
-			this.pageContext = pageContext;
+			this.webContext = webContext;
 			beforeShow();
 			beforeExecute();
 			execute();
 			afterExecute();
-			prepareOnly(pageContext);
+			prepareOnly(webContext);
 			afterPrepared();
-			showText(pageContext);
-			showPageOrUrl(pageContext, this.page, this);
+			showText(webContext);
+			showPageOrUrl(webContext, this.page, this);
 			afterShow();
 		} finally {
-			this.pageContext = null;
+			this.webContext = null;
 		}
 		return this;
 	}
-
-	/** Direct out put the text into pageContext.out */
-	private WebBox showText(PageContext pageContext) {
-		if (text != null && text.length() > 0)
-			try {
-				pageContext.getOut().write(text);
-			} catch (IOException e) {
-				throw new WebBoxException(e);
-			}
-		return this;
+	
+	public WebBox show(PageContext pageContext) {
+		return show(new WebContext(pageContext));
 	}
 
+	/** Direct out put the text into webContext.out */
+	private WebBox showText(WebContext webContext) {
+		if (text != null && text.length() > 0)
+			webContext.print(text);
+		return this;
+	} 
+ 
 	/** Prepare data, only but do not output text and do not show page */
-	public void prepareOnly(PageContext pageContext) {
+	public void prepareOnly(WebContext webContext) {
 		if (!isEmptyStr(prepareStaticMethod)) {
 			int index = prepareStaticMethod.lastIndexOf('.');
 			String className = prepareStaticMethod.substring(0, index);
@@ -149,40 +145,50 @@ public class WebBox {
 				throw new WebBoxException("Error#001: Can not call method: " + prepareStaticMethod);
 			try {
 				Class<?> c = Class.forName(className);
-				Method m = c.getMethod(methodName, PageContext.class, WebBox.class);
-				m.invoke(c, pageContext, this); // Call a static method
+				Method m = c.getMethod(methodName, WebContext.class, WebBox.class);
+				m.invoke(c, webContext, this); // Call a static method
 			} catch (Exception e) {
 				throw new WebBoxException(e);
 			}
 		}
 		if (prepareBean != null)
-			executeBeanMethod(pageContext);
-		showPageOrUrl(pageContext, this.prepareURL, this);
+			executeBeanMethod(webContext);
+		showPageOrUrl(webContext, this.prepareURL, this);
 	}
 
+	public void prepareOnly(PageContext pageContext) {
+		prepareOnly(new WebContext(pageContext)); 
+	}
+	
+	
 	/** Execute Bean Method */
-	private void executeBeanMethod(PageContext pageContext) {
+	private void executeBeanMethod(WebContext webContext) {
 		try {
 			Class<?> c = prepareBean.getClass();
 			String methodName = isEmptyStr(prepareBeanMethod) ? "prepare" : prepareBeanMethod;
-			Method m = c.getMethod(methodName, PageContext.class, WebBox.class);
-			m.invoke(prepareBean, pageContext, this); // Call a bean method
+			Method m = c.getMethod(methodName, WebContext.class, WebBox.class);
+			m.invoke(prepareBean, webContext, this); // Call a bean method
 		} catch (Exception e) {
 			throw new WebBoxException(e);
 		}
 	}
 
 	/** Show page only, do not call prepareStaticMethod and URL */
+	public WebBox showPageOnly(WebContext webContext) {
+		return showPageOrUrl(webContext, this.page, this);
+	}
+	
+	/** Show page only, do not call prepareStaticMethod and URL */
 	public WebBox showPageOnly(PageContext pageContext) {
-		return showPageOrUrl(pageContext, this.page, this);
+		return showPageOrUrl(new WebContext(pageContext), this.page, this);
 	}
 
 	/** Private method, use RequestDispatcher to show a URL or JSP page */
-	private static WebBox showPageOrUrl(PageContext pageContext, Object page, WebBox currentBox) {
+	private static WebBox showPageOrUrl(WebContext webContext, Object page, WebBox currentBox) {
 		if (page == null)
 			return currentBox;
 		if (page instanceof WebBox) {
-			((WebBox) page).show(pageContext);
+			((WebBox) page).show(webContext);
 			return currentBox;
 		}
 		if (!(page instanceof String))
@@ -190,55 +196,58 @@ public class WebBox {
 		String pageOrUrl = (String) page;
 		if (isEmptyStr(pageOrUrl))
 			return currentBox;
-		WebBox fatherWebBox = (WebBox) pageContext.getRequest().getAttribute(JWEBBOX_ID);
+		WebBox fatherWebBox = (WebBox) webContext.getRequest().getAttribute(JWEBBOX_ID);
 		if (fatherWebBox != null)
 			currentBox.setFatherWebBox(fatherWebBox);
-		pageContext.getRequest().setAttribute(JWEBBOX_ID, currentBox);
+		webContext.getRequest().setAttribute(JWEBBOX_ID, currentBox);
 		try {
-			pageContext.getOut().flush();
-			pageContext.getRequest().getRequestDispatcher(pageOrUrl).include(pageContext.getRequest(),
-					pageContext.getResponse());
+			System.out.println("pageOrUrl="+pageOrUrl);
+			System.out.println("webContext="+webContext);
+			System.out.println("webContext="+webContext.getPageContext());
+			webContext.getPageContext().getOut().flush();
+			webContext.getPageContext().getRequest().getRequestDispatcher(pageOrUrl).include(webContext.getPageContext().getRequest(),
+					webContext.getPageContext().getResponse());
+			System.out.println("=========done======");
 		} catch (Exception e) {
 			throw new WebBoxException(e);
 		} finally {
-			pageContext.getRequest().setAttribute(JWEBBOX_ID, fatherWebBox);
+			webContext.getRequest().setAttribute(JWEBBOX_ID, fatherWebBox);
 			currentBox.setFatherWebBox(null);
 		}
 		return currentBox;
 	}
 
-	/** Get current pageContext's WebBox instance */
-	public static WebBox getBox(PageContext pageContext) {
-		WebBox currentBox = (WebBox) pageContext.getRequest().getAttribute(JWEBBOX_ID);
+	/** Get current webContext's WebBox instance */
+	public static WebBox getBox(WebContext webContext) {
+		WebBox currentBox = (WebBox) webContext.getRequest().getAttribute(JWEBBOX_ID);
 		if (currentBox == null)
-			throw new WebBoxException("Error#003: Can not find WebBox instance in pageContext");
+			throw new WebBoxException("Error#003: Can not find WebBox instance in webContext");
 		return currentBox;
 	}
 
 	/** Get an attribute from current page's WebBox instance */
-	public static <T> T getAttribute(PageContext pageContext, String attributeName) {
-		T obj = getBox(pageContext).getAttribute(attributeName);
-		return obj;
+	public static <T> T getAttribute(WebContext webContext, String attributeName) {
+		return getBox(webContext).getAttribute(attributeName); 
 	}
 
 	/** Assume the value is String or WebBox instance, show it */
-	public static void showAttribute(PageContext pageContext, String attributeName) {
-		Object obj = WebBox.getAttribute(pageContext, attributeName);
-		showTarget(pageContext, obj);
+	public static void showAttribute(WebContext webContext, String attributeName) {
+		Object obj = WebBox.getAttribute(webContext, attributeName);
+		showTarget(webContext, obj);
 	}
 
 	/**
 	 * Show an target object, target can be: WebBox instance or String or List of
 	 * WebBox instance or String
 	 */
-	public static void showTarget(PageContext pageContext, Object target) {
+	public static void showTarget(WebContext webContext, Object target) {
 		if (target == null)
 			return;
 		if (target instanceof WebBox)
-			((WebBox) target).show(pageContext);
+			((WebBox) target).show(webContext);
 		else if (target instanceof ArrayList<?>) {
 			for (Object item : (ArrayList<?>) target)
-				showTarget(pageContext, item);
+				showTarget(webContext, item);
 		} else if (target instanceof Class) {
 			WebBox bx = null;
 			try {
@@ -246,17 +255,13 @@ public class WebBox {
 			} catch (Exception e) {
 				throw new WebBoxException("Can not create WebBox instance for target class '" + target + "'", e);
 			}
-			bx.show(pageContext);
+			bx.show(webContext);
 		} else if (target instanceof String) {
 			String str = (String) target;
 			if (str.startsWith("/")) {
-				showPageOrUrl(pageContext, str, getBox(pageContext));
+				showPageOrUrl(webContext, str, getBox(webContext));
 			} else {
-				try {
-					pageContext.getOut().write(str);
-				} catch (IOException e) {
-					throw new WebBoxException(e);
-				}
+				webContext.print(str);
 			}
 		} else
 			throw new WebBoxException("Can not show unknow type object " + target + " on page");
@@ -274,50 +279,50 @@ public class WebBox {
 	@SuppressWarnings("unchecked")
 	public <T> T getAttribute(String key) {
 		Object obj = attributeMap.get(key);
-		if (obj == null && pageContext != null) {
-			obj = pageContext.getRequest().getAttribute(key);
+		if (obj == null && webContext != null) {
+			obj = webContext.getRequest().getAttribute(key);
 			if (obj == null)
-				obj = pageContext.getRequest().getParameter(key);
+				obj = webContext.getRequest().getParameter(key);
 			if (obj == null)
-				obj = pageContext.getAttribute(key);
+				obj = webContext.getPageContextAttribute(key);
 			if (obj == null)
-				obj = pageContext.getSession().getAttribute(key);
+				obj = webContext.getSession().getAttribute(key);
 		}
 		return (T) obj;
 	}
 
 	/**
 	 * Search and return an attribute object follow this order:
-	 * pageContext->request->parameter->session
+	 * webContext->request->parameter->session
 	 */
 	@SuppressWarnings("unchecked")
 	public <T> T getObject(String key) {
-		if (pageContext == null || key == null)
+		if (webContext == null || key == null)
 			return null;
-		Object obj = pageContext.getAttribute(key);
+		Object obj = webContext.getPageContextAttribute(key);
 		if (obj == null)
-			obj = pageContext.getRequest().getAttribute(key);
+			obj = webContext.getRequest().getAttribute(key);
 		if (obj == null)
-			obj = pageContext.getRequest().getParameter(key);
+			obj = webContext.getRequest().getParameter(key);
 		if (obj == null)
-			obj = pageContext.getSession().getAttribute(key);
+			obj = webContext.getSession().getAttribute(key);
 
 		return (T) obj;
 	}
 
-	/** Set a pageContext attribute */
+	/** Set a webContext attribute */
 	public void setPageContextAttribute(String key, Object value) {
-		pageContext.setAttribute(key, value);
+		webContext.setPageContextAttribute(key, value);
 	}
 
 	/** Set a request attribute */
 	public void setRequestAttribute(String key, Object value) {
-		pageContext.getRequest().setAttribute(key, value);
+		webContext.getRequest().setAttribute(key, value);
 	}
 
 	/** Set a session attribute */
 	public void setSessionAttribute(String key, Object value) {
-		pageContext.getSession().setAttribute(key, value);
+		webContext.getSession().setAttribute(key, value);//NOSONAR
 	}
 
 	/** Get the prepare URL */
@@ -424,63 +429,10 @@ public class WebBox {
 	}
 
 	/**
-	 * Get current pageContext if have
+	 * Get current webContext if have
 	 */
-	public PageContext getPageContext() {
-		return pageContext;
+	public WebContext getWebContext() {
+		return webContext;
 	}
 
-	/**
-	 * Set pageContext to it
-	 */
-	public void setPageContext(PageContext pageContext) {
-		this.pageContext = pageContext;
-	}
-
-	/** A runtime exception caused by WebBox */
-	public static class WebBoxException extends RuntimeException {
-		private static final long serialVersionUID = 1L;
-
-		public WebBoxException(String msg) {
-			super(msg);
-		}
-
-		public WebBoxException(Throwable e) {
-			super(e);
-		}
-
-		public WebBoxException(String msg, Throwable e) {
-			super(msg, e);
-		}
-	}
-
-	/** This is a custom TagLib for JSP and also can be used in FreeMaker */
-	public static class Show extends SimpleTagSupport {
-		private String attribute;
-
-		public String getAttribute() {
-			return attribute;
-		}
-
-		public void setAttribute(String attribute) {
-			this.attribute = attribute;
-		}
-
-		private Object target;
-
-		public Object getTarget() {
-			return target;
-		}
-
-		public void setTarget(Object target) {
-			this.target = target;
-		}
-
-		public void doTag() throws JspException, IOException {
-			if (attribute != null && attribute.length() != 0)
-				WebBox.showAttribute((PageContext) getJspContext(), getAttribute());
-			if (target != null)
-				WebBox.showTarget((PageContext) getJspContext(), target);
-		}
-	}
 }
