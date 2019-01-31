@@ -19,7 +19,8 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.jsp.PageContext;
+
+import com.github.drinkjava2.jwebbox.render.HtmlRender;
 
 /**
  * WebBox is a small layout tool used in servlet environment
@@ -28,6 +29,29 @@ import javax.servlet.jsp.PageContext;
  * @since v1.0.0
  */
 public class WebBox {
+	/** Webapp Folder full path */
+	private static String webappFolder;
+
+	public static String getWebappFolder() {
+		return webappFolder;
+	}
+
+	public static void setWebappFolder(String webappFolder) {
+		WebBox.webappFolder = webappFolder;
+	}
+
+	static {
+		webappFolder = HtmlRender.class.getClassLoader().getResource("").getPath();
+		if (webappFolder != null) {
+			if (webappFolder.contains("/WEB-INF"))
+				webappFolder = WebBoxStrUtils.substringBefore(webappFolder, "/WEB-INF");
+			else {
+				// This is in Eclipse or MVN environment
+				webappFolder = WebBoxStrUtils.substringBefore(webappFolder, "/target/") + "/src/main/webapp";
+			}
+		}
+	}
+
 	public static final String JWEBBOXID = "WEBBOX";
 
 	/** Optional, you can give a name to HtmlBox instance */
@@ -49,7 +73,7 @@ public class WebBox {
 	private String text;
 
 	/**
-	 * A JSP or FTL page String, or a HtmlBox instance, or a HtmlBox class, 5th
+	 * A HTML or FTL page String, or a HtmlBox instance, or a HtmlBox class, 5th
 	 * output, if not empty
 	 */
 	private Object page;
@@ -57,8 +81,8 @@ public class WebBox {
 	/** Inside use hashmap store attributes */
 	private Map<String, Object> attributeMap = new HashMap<String, Object>();
 
-	/** Point to father HtmlBox instance if have */
-	private WebBox fatherHtmlBox;
+	/** Point to father WebBox instance if have */
+	private WebBox fatherWebBox;
 
 	private HttpServletRequest request;
 
@@ -72,7 +96,7 @@ public class WebBox {
 	 * Create a HtmlBox
 	 * 
 	 * @param page
-	 *            The JSP or FTL or any URL, for example: "/template/abc.jsp"
+	 *            The JSP or FTL or any URL, for example: "/template/abc.htm"
 	 */
 	public WebBox(String page) {
 		this.setPage(page);
@@ -160,7 +184,7 @@ public class WebBox {
 		try {
 			Class<?> c = prepareBean.getClass();
 			String methodName = isEmptyStr(prepareBeanMethod) ? "prepare" : prepareBeanMethod;
-			Method m = c.getMethod(methodName, PageContext.class, WebBox.class);
+			Method m = c.getMethod(methodName, HttpServletRequest.class, HttpServletResponse.class, WebBox.class);
 			m.invoke(prepareBean, request, response, this); // Call a bean method
 		} catch (Exception e) {
 			throw new WebBoxException(e);
@@ -178,7 +202,7 @@ public class WebBox {
 	 * @throws Exception
 	 */
 	public void render(HttpServletRequest request, HttpServletResponse response, String pageOrUrl) throws Exception {// NOSONAR
-		WebBoxRenders.renderAsHtml(request, response, pageOrUrl);
+		HtmlRender.renderAsHtml(request, response, pageOrUrl);
 	}
 
 	/** Private method, use RequestDispatcher to show a URL or JSP page */
@@ -200,8 +224,11 @@ public class WebBox {
 			currentBox.setFatherHtmlBox(fatherHtmlBox);
 		request.setAttribute(JWEBBOXID, currentBox);
 		try {
-			response.getWriter().flush();
-			currentBox.render(request, response, pageOrUrl);
+			if (response!=null && response.getWriter() != null)
+				response.getWriter().flush();
+			currentBox.render(request, response, pageOrUrl); 
+			if (response!=null && response.getWriter() != null)
+				response.getWriter().flush();
 		} catch (Exception e) {
 			throw new WebBoxException(e);
 		} finally {
@@ -221,7 +248,7 @@ public class WebBox {
 
 	/** Get an attribute from current page's HtmlBox instance */
 	public static <T> T getAttribute(HttpServletRequest request, HttpServletResponse response, String attributeName) {
-		return getBox(request).getAttribute(attributeName); 
+		return getBox(request).getAttribute(attributeName);
 	}
 
 	/** Assume the value is String or HtmlBox instance, show it */
@@ -283,8 +310,6 @@ public class WebBox {
 				obj = request.getParameter(key);
 			if (obj == null)
 				obj = request.getAttribute(key);
-			if (obj == null)
-				obj = request.getSession().getAttribute(key);
 		}
 		return (T) obj;
 	}
@@ -413,12 +438,12 @@ public class WebBox {
 
 	/** Set the father page's HtmlBox instance */
 	public WebBox getFatherHtmlBox() {
-		return fatherHtmlBox;
+		return fatherWebBox;
 	}
 
 	/** Get the father page's HtmlBox instance */
 	public void setFatherHtmlBox(WebBox fatherHtmlBox) {
-		this.fatherHtmlBox = fatherHtmlBox;
+		this.fatherWebBox = fatherHtmlBox;
 	}
 
 	/** Get current Box's HttpServletRequest if have */
@@ -455,6 +480,13 @@ public class WebBox {
 
 		public WebBoxException(String msg, Throwable e) {
 			super(msg, e);
+		}
+
+		/** Assure object not null, optionMessages is optional */
+		public static void assureNotNull(Object obj, String... optionMessages) {
+			if (obj == null)
+				throw new WebBoxException(
+						optionMessages.length == 0 ? "Assert error, Parameter can not be null" : optionMessages[0]);
 		}
 	}
 

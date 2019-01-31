@@ -950,7 +950,7 @@ public class WebBoxStrUtils {
 				return false;
 		return true;
 	}
-	
+
 	public static String readFile(String fileFullPath, String encoding) {
 		InputStream inputStream;
 		try {

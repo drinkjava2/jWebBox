@@ -1,4 +1,5 @@
-/* Copyright 2018-2020 the original author or authors.
+/*
+ * Copyright (C) 2016-2020 Yong Zhu.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -8,23 +9,21 @@
  * OF ANY KIND, either express or implied. See the License for the specific
  * language governing permissions and limitations under the License.
  */
-package com.demo;
-
-import org.junit.Test;
-
-import com.github.drinkjava2.jwebbox.WebBox;
+package com.github.drinkjava2.jwebbox.render;
 
 /**
- * Unit test of html layout
+ * The html item
  * 
  * @author Yong Zhu
- * @since 1.0.0
+ * @since 3.0
  */
-public class htmlLayoutTest {
+public class HtmlItem {
+	public HtmlItemType type;
+	public Object value;
 
-	@Test
-	public void testHtmlLayout() {
-		System.out.println(WebBox.getWebappFolder());
+	public HtmlItem(Object value, HtmlItemType type) {
+		this.value = value;
+		this.type = type;
 	}
 
 }

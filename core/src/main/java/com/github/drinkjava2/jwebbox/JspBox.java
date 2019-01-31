@@ -195,6 +195,7 @@ public class JspBox {
 			pageContext.getOut().flush();
 			pageContext.getRequest().getRequestDispatcher(pageOrUrl).include(pageContext.getRequest(),
 					pageContext.getResponse());
+			pageContext.getOut().flush();
 		} catch (Exception e) {
 			throw new JspBoxException(e);
 		} finally {
@@ -276,9 +277,7 @@ public class JspBox {
 			if (obj == null)
 				obj = pageContext.getRequest().getParameter(key);
 			if (obj == null)
-				obj = pageContext.getAttribute(key);
-			if (obj == null)
-				obj = pageContext.getSession().getAttribute(key);
+				obj = pageContext.getAttribute(key); 
 		}
 		return (T) obj;
 	}
