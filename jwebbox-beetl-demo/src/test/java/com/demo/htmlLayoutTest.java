@@ -12,27 +12,19 @@ package com.demo;
 
 import org.junit.Test;
 
-import com.demo.jspmock.MockPageContext;
-import com.demo.jspmock.MockRequest;
-import com.demo.jspmock.MockResponse;
-import com.jwebboxdemo.Dispatcher;
+import com.github.drinkjava2.jwebbox.WebBox;
 
 /**
- * Unit test of Dao
+ * Unit test of html layout
  * 
  * @author Yong Zhu
  * @since 1.0.0
  */
-public class MockTest {
+public class htmlLayoutTest {
 
 	@Test
-	public void testHomepage() {
-		MockPageContext pageContext = new MockPageContext();
-		MockRequest request = (MockRequest) pageContext.getRequest();
-		MockResponse response = new MockResponse();
-		request.setRequestURI("/demo4.page");
-		Dispatcher.doDispatch(request, response);
-		System.out.println(MockResponse.baos.toString());
+	public void testHtmlLayout() {
+		System.out.println(WebBox.getWebappFolder());
 	}
 
 }

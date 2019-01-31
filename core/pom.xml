@@ -4,7 +4,7 @@
  <groupId>com.github.drinkjava2</groupId>
  <artifactId>jwebbox</artifactId>
  <packaging>jar</packaging>
- <version>3.0</version> <!--not released!-->
+ <version>3.0</version>
  
  <name>jWebBox</name>
  <description>jWebBox is a JSP and FreeMaker layout tool</description> 
@@ -42,7 +42,7 @@
         <maven.compiler.encoding>UTF-8</maven.compiler.encoding> 
         <!-- Release on JDK1.8 -->
         <version.java>1.8</version.java>
-        <version.javadoc>6</version.javadoc>
+        <version.javadoc>8</version.javadoc>
         <version.compiler-plugin>3.3</version.compiler-plugin>
         <version.war-plugin>2.6</version.war-plugin>
         <version.clean-plugin>3.0.0</version.clean-plugin>
@@ -167,11 +167,12 @@
                             <links>
                                 <link>http://docs.oracle.com/javase/${version.javadoc}/docs/api</link>
                             </links>
-                            <!-- close doc line check, for Java6,7 only, if run on Java8 will get a Javadoc-plugin error -->
-                            <properties>
+                            <!-- close doc line check, for Java6,7 only -->
+                            <!--properties>
                               <javadoc.opts>-Xdoclint:none</javadoc.opts>
-                            </properties>
-                            <!-- close doc lint check for JAVA8 is additionalparam>-Xdoclint:none</additionalparam-->
+                            </properties-->
+                            <!-- close doc lint check for JAVA8 -->
+							<additionalparam>-Xdoclint:none</additionalparam>
                         </configuration>
                     </plugin>
                     <plugin>

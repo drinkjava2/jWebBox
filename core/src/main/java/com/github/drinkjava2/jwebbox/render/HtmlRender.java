@@ -49,6 +49,8 @@ public class HtmlRender {// NOSONAR
 				Object attribute = box.getAttribute((String) item.value);
 				if (attribute != null)
 					WebBox.showTarget(request, response, attribute);
+				else
+					throw new WebBoxException("Null pageOrUrl context found: '" + item.value + "' in " + pageOrUrl);
 			}
 		}
 	}

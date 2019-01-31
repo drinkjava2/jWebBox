@@ -25,12 +25,23 @@ import com.jwebboxdemo.Dispatcher;
  */
 public class MockTest {
 
+	//pass to test without servlet start
 	@Test
-	public void testHomepage() {
+	public void testDemo1() {
 		MockPageContext pageContext = new MockPageContext();
 		MockRequest request = (MockRequest) pageContext.getRequest();
 		MockResponse response = new MockResponse();
-		request.setRequestURI("/demo4.page");
+		request.setRequestURI("/demo1.page");
+		Dispatcher.doDispatch(request, response);
+		System.out.println(MockResponse.baos.toString());
+	}
+	
+	//fail to test out of servlet 
+	public void testBeetl() {
+		MockPageContext pageContext = new MockPageContext();
+		MockRequest request = (MockRequest) pageContext.getRequest();
+		MockResponse response = new MockResponse();
+		request.setRequestURI("/beetlDemo.page");
 		Dispatcher.doDispatch(request, response);
 		System.out.println(MockResponse.baos.toString());
 	}
