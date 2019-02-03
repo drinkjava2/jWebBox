@@ -12,7 +12,6 @@ package com.demo;
 
 import org.junit.Test;
 
-import com.demo.jspmock.MockPageContext;
 import com.demo.jspmock.MockRequest;
 import com.demo.jspmock.MockResponse;
 import com.jwebboxdemo.Dispatcher;
@@ -26,9 +25,8 @@ import com.jwebboxdemo.Dispatcher;
 public class MockTest {
 
 	@Test
-	public void testHomepage() {
-		MockPageContext pageContext = new MockPageContext();
-		MockRequest request = (MockRequest) pageContext.getRequest();
+	public void testHomepage() { 
+		MockRequest request = new MockRequest();
 		MockResponse response = new MockResponse();
 		request.setRequestURI("/demo4.page");
 		Dispatcher.doDispatch(request, response);

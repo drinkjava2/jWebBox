@@ -11,8 +11,8 @@
 
 ### JWebBox特点：
 1. 简单, 整个项目仅约1千行源码，易于学习和维护。
-2. 与jBeanBox和jSqlBox项目类似，用纯JAVA类代替XML配置（实际上前两个项目是受此项目启发)，支持动态配置，配置可以在运行期动态生成和修改。
-3. 无侵入性，支持JSP和FreeMaker两种模板混用。可用于整个网站的服务端布局，也可用于编写页面局部零件。
+2. 与jBeanBox和jSqlBox项目类似，用纯JAVA类代替XML配置（实际上前两个项目是受此项目启发)，支持动态配置，配置可以继承，可以在运行期动态生成。
+3. 无侵入性，支持JSP、FreeMaker、html、Beetl等各种模板混用。可用于整个网站的服务端布局，也可用于编写页面局部零件。
 4. 支持静态方法、实例方法、URL引用三种数据准备方式。
 5. 可利用它搭建小巧的MVC架构，无须引入第三方MVC框架，详见[jBooox](https://gitee.com/drinkjava2/jBooox)、GoSqlGo等项目。
   
@@ -42,19 +42,177 @@
 ```
 jWebBox3.0运行于Java8或以上，如果使用JSP布局，还依赖于javax.servlet-api和javax.servlet.jsp-api这两个运行期库(通常由Servlet容器提供)。  
 
-### 详细介绍
-在jwebbox-jsp-demo和jwebbox-html-demo两个目录下，分别演示了纯html和JSP两种布局用法。
-
-### 先介绍纯HTML环境下布局的使用，见jwebbox-html-demo子目录
-#### 示例1 - 一个带menu、body、footer的三栏布局，文件名  
+### 先介绍纯HTML环境下布局的使用，具体示例详见jwebbox-html-demo子目录
+采用HTML布局的优点是可以将所有界面生成逻辑放在前端，降低对后端程序员的要求，并且可以在不启动Servlet容器的前提下进行单元测试。  
+#### 示例1 - 一个带menu、body、footer的三栏布局配置：
 ```
+	public static class demo1 extends baseBox {
+		{   
+			setPage("/WEB-INF/pages/layout.htm");
+			setAttribute("body", new body());
+			setAttribute("footer", new footer());
+		}
+	}
+
+	public static class body extends baseBox {
+		{
+			setPage("/WEB-INF/pages/body.htm");
+		}
+	}
+
+	public static class footer extends baseBox {
+		{
+			setPage("/WEB-INF/pages/footer.htm");
+		}
+	}
 ```
+对应的html模板为:
+```
+<!DOCTYPE html>
+<html>
+<head>
+<title>JWebBox Demo</title>  
+</head> 
+	<body>
+		<div id="temp_content">
+			<div id="temp_menu">
+				<div align="center"> 
+ 				    $$show(/WEB-INF/pages/menu.htm)
+				</div>
+			</div> 
+			<div align="center">
+				    $$show(body)
+			</div>  
+			<div id="temp_footer">
+				<div align="center">
+				    $$show(footer) 
+				</div>
+			</div>	
+		</div>
+	</body>
+</html> 
+```
+在运行期，在Servlet中调用new demo1().show(request, response);就可以得到最终生成的HTML页面了，
 
+#### 示例2和3 - 布局的继承
+服务端代码：
+```
+	public static class demo2 extends demo1 {
+		{
+			setAttribute("body", new leftRight());
+		}
+	}
 
-### 再介绍JSP环境下布局的使用
-JSP环境下布局功能比HTML要强许多，这是因为JSP表达力比HTML丰富，它默认支持标签功能，jWebBox为JSP环境开发了Show标签，可以进行比较复杂的布局。  
-但是通常情况下，建议后端尽可能采用纯HTML布局，不建议用JSP布局，因为JSP虽然功能强大，但是不利于前后端维护和单元测试。  
+	public static class demo3 extends demo1 {
+		{
+			setAttribute("body", new topDown());
+		}
+	}
 
+	public static class leftRight extends baseBox {
+		{
+			setPage("/WEB-INF/pages/left_right_layout.htm");
+			setAttribute("page1", "/WEB-INF/pages/page1.htm");
+			setAttribute("page2", "/WEB-INF/pages/page2.htm");
+		}
+	}
+
+	public static class topDown extends leftRight {
+		{
+			setPage("/WEB-INF/pages/top_down_layout.htm");
+		}
+	}
+```
+demo2继承于demo1，将"body"属性改成了一个左右布局leftRight。  
+demo3继承于demo1，将"body"属性改成了一个上下布局topDown，这个上下布局继承于左右布局，只是更改了模板。  
+
+#### 示例4 - 列表布局
+服务端代码：
+```
+	public static class demo4 extends demo1 {
+		{
+			ArrayList<Object> child = new ArrayList<Object>();
+			for (int i = 1; i <= 3; i++)
+				child.add(new WebBox("/WEB-INF/pages/page" + i + ".htm").setText("&nbsp;&nbsp;&nbsp;&nbsp;Child: "));
+			ArrayList<Object> mainList = new ArrayList<Object>();
+			for (int i = 1; i <= 3; i++) {
+				mainList.add("/WEB-INF/pages/page" + i + ".htm");
+				if (i == 2)
+					mainList.add(child);
+			}
+			this.setAttribute("body", mainList);
+		}
+	} 
+```
+布局可以在运行期动态生成，如果属性是一个List，将假定列表项目为WebBox对象，会按照列表顺序进行输出。
+
+#### 示例5 - 数据准备方法
+服务端代码：
+```
+	public static class demo5 extends demo1 {
+		{
+			setPrepareStaticMethod(DemoBoxConfig.class.getName() + ".changeMenu");
+			setAttribute("body", new WebBox().setText("<div style=\"width:900px\"> This is body text </div>")
+					.setPrepareURL("/WEB-INF/pages/prepare.htm").setPrepareBean(new Printer()));
+			setAttribute("footer", new WebBox("/WEB-INF/pages/footer.htm").setPrepareBean(new Printer())
+					.setPrepareBeanMethod("print"));
+		}
+	}
+
+	public static void changeMenu(HttpServletRequest request, HttpServletResponse response, WebBox callerBox)
+			throws IOException {
+		callerBox.setAttribute("msg", "This is set by \"changeMenu\" static method");
+	}
+
+	public static class Printer {
+		public void prepare(HttpServletRequest request, HttpServletResponse response, WebBox callerBox)
+				throws IOException {
+			response.getWriter().write("This is printed by Printer's default \"prepare\" method <br/>");
+		}
+
+		public void print(HttpServletRequest request, HttpServletResponse response, WebBox callerBox)
+				throws IOException {
+			response.getWriter().print("This is printed by Printer's \"print\" method <br/>");
+		}
+	}
+```
+相比与普通JSP的Include指令，WebBox这种布局工具的优势在于可以在各个子页面加载之前调用一些方法。jWebBox有三种数据准备方式:  
+* setPrepareStaticMethod方法指定一个静态方法用于数据准备。
+* setPrepareBean方法指定一个对象实例用于数据准备，用setPrepareBeanMethod来指定对象的方法名，如果不指定方法名，将缺省使用"prepare"作为方法名。
+* setPrepareURL方法将调用一个URL来作为数据谁备，这是一个服务端的URL引用，可以访问/WEB-INF目录下的内容。
+另外WebBox还可以用setText方法额外设置一小段文本，将直接作为HTML代码片段插入到子页面前面。
+
+各个准备方法及页面输出的顺序如下：  
+prepareStaticMethod -> prepareBeanMethod -> PrepareURL -> text output -> page
+
+#### 示例6 - 其它模板支持，示例源码详见jwebbox-html-demo子目录
+WebBox可以支持任意模板，利如以下配置将主页面的body部分用Beetl模板输出：
+```
+public static class beetlDemo extends demo1 {
+		{ 
+			setAttribute("body", new beetlPage());
+		}
+	} 
+
+	public static class beetlPage extends WebBox {
+		{
+			setPage("/beetl.btl");
+		}
+
+		@Override
+		public void render(HttpServletRequest request, HttpServletResponse response, String pageOrUrl)
+				throws Exception {
+			ServletGroupTemplate.instance().render(pageOrUrl, request, response);
+		}
+
+	}
+```
+要支持其它模板，需要重写WebBox类的render方法。通过重写这个方法，可以支持不限类型的模板。重写可只写在根类上，其它的布局继承它即可。  
+支持继承是jWebBox布局工具的一个最大的优点。  
+
+### 再介绍JSP环境下布局的使用，详见Demo目录下的jwebbox-jsp-demo目录
+JSP环境下布局功能比HTML要强许多，它可以运行嵌入在JSP中的Java，并有许多标签库可以使用。但JSP的缺点是需要Servlet容器支持，不利于单元测试。  
+JSP的布局和HTML布局很类似，只是改成了使用JspBox来代替WebBox类，
 #### 示例1 - 一个带菜单和底脚的左右布局    
 ``` 
   public static class demo1 extends JspBox {
@@ -328,11 +486,10 @@ FreeMaker不支持直接在页面嵌入Java代码，语法也与JSP不同，引�
 示例6截图：   
 ![image](demo6.png) 
 
-
-以上即为jWebBox的全部说明文档，如有不清楚处，可以查看项目源码或示例项目的源码。
-
+以上即为jWebBox的全部说明文档，如有不清楚处，可以查看项目源码或示例项目的源码，这是一个很小的项目，只有几个文件。
 
 #### 附录-版本更新记录：
 jWebBox2.1 添加FreeMaker模板支持;增加一个JSP标签;添加了表格、分页、表单处理的演示;更正WebLogic不能运行的bug。  
 jWebBox2.1.1 添加了beforeShow、beforeexecute、execute、afterExecute、afterShow、afterPrepared几个空方法作为回调函数给子类用。示例详见jBooox项目。  
-jWebBox2.1.2 show()方法原来为void类型，现改为WebBox实例，便方便使用。  
+jWebBox2.1.2 show()方法原来返回为void类型，现改为WebBox实例，便方便使用。  
+jWebBox3.0 WebBox改为支持纯HTML布局，原来的JSP布局功能改为使用JspBox实现。  

@@ -2,17 +2,14 @@ package com.jwebboxdemo;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.beetl.core.Configuration;
-import org.beetl.core.GroupTemplate;
-import org.beetl.core.resource.FileResourceLoader;
 import org.beetl.ext.servlet.ServletGroupTemplate;
 
 import com.github.drinkjava2.jwebbox.WebBox;
-import com.github.drinkjava2.jwebbox.WebBox.WebBoxException;
 
 @SuppressWarnings("all")
 public class DemoBoxConfig {
@@ -110,13 +107,12 @@ public class DemoBoxConfig {
 	}
 
 	public static class beetlDemo extends demo1 {
-		{
-			setAttribute("body", new beetlBody());
+		{ 
+			setAttribute("body", new beetlPage());
 		}
-	}
- 
+	} 
 
-	public static class beetlBody extends WebBox {
+	public static class beetlPage extends WebBox {
 		{
 			setPage("/beetl.btl");
 		}
@@ -124,7 +120,7 @@ public class DemoBoxConfig {
 		@Override
 		public void render(HttpServletRequest request, HttpServletResponse response, String pageOrUrl)
 				throws Exception {
-			 ServletGroupTemplate.instance().render(pageOrUrl, request, response); 
+			ServletGroupTemplate.instance().render(pageOrUrl, request, response);
 		}
 
 	}

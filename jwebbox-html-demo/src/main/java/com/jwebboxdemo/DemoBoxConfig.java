@@ -23,6 +23,19 @@ public class DemoBoxConfig {
 		}
 	}
 
+	public static class body extends baseBox {
+		{
+			setPage("/WEB-INF/pages/body.htm");
+		}
+	}
+
+	public static class footer extends baseBox {
+		{
+			setPage("/WEB-INF/pages/footer.htm");
+		}
+	}
+	
+	
 	public static class demo2 extends demo1 {
 		{
 			setAttribute("body", new leftRight());
@@ -62,19 +75,7 @@ public class DemoBoxConfig {
 			}
 			this.setAttribute("body", mainList);
 		}
-	}
-
-	public static class body extends baseBox {
-		{
-			setPage("/WEB-INF/pages/body.htm");
-		}
-	}
-
-	public static class footer extends baseBox {
-		{
-			setPage("/WEB-INF/pages/footer.htm");
-		}
-	}
+	} 
 
 	public static class demo5 extends demo1 {
 		{

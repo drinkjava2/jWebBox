@@ -48,7 +48,7 @@
       <groupId>com.github.drinkjava2</groupId>
       <artifactId>jwebbox</artifactId>
       <version>3.0</version> <!-- or newest jWebBox -->
-    </dependency>  
+    </dependency> 
 	
 	<!-- Servlet libs, usually supplied by Servlet Server -->
     <dependency>
@@ -56,22 +56,6 @@
        <artifactId>javax.servlet-api</artifactId>
        <version>4.0.1</version>
        <scope>provided</scope>
-    </dependency>
-
-    <!-- JSP libs, usually supplied by Servlet Server -->
-    <dependency>
-      <groupId>javax.servlet.jsp</groupId>
-      <artifactId>javax.servlet.jsp-api</artifactId>
-      <version>2.3.3</version>
-      <scope>provided</scope>
-    </dependency>
-	
-	 <!-- JSP EL libs, usually supplied by Servlet Server -->
-    <dependency>
-      <groupId>javax.el</groupId>
-      <artifactId>javax.el-api</artifactId>
-      <version>3.0.0</version>
-	  <scope>provided</scope>
     </dependency>
 	
   <!-- Apache commons-lang -->

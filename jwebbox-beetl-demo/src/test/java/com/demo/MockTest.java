@@ -12,7 +12,6 @@ package com.demo;
 
 import org.junit.Test;
 
-import com.demo.jspmock.MockPageContext;
 import com.demo.jspmock.MockRequest;
 import com.demo.jspmock.MockResponse;
 import com.jwebboxdemo.Dispatcher;
@@ -27,9 +26,8 @@ public class MockTest {
 
 	//pass to test without servlet start
 	@Test
-	public void testDemo1() {
-		MockPageContext pageContext = new MockPageContext();
-		MockRequest request = (MockRequest) pageContext.getRequest();
+	public void testDemo1() { 
+		MockRequest request = new MockRequest();
 		MockResponse response = new MockResponse();
 		request.setRequestURI("/demo1.page");
 		Dispatcher.doDispatch(request, response);
@@ -38,8 +36,7 @@ public class MockTest {
 	
 	//fail to test out of servlet 
 	public void testBeetl() {
-		MockPageContext pageContext = new MockPageContext();
-		MockRequest request = (MockRequest) pageContext.getRequest();
+		MockRequest request = new MockRequest();
 		MockResponse response = new MockResponse();
 		request.setRequestURI("/beetlDemo.page");
 		Dispatcher.doDispatch(request, response);
